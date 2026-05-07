@@ -78,13 +78,13 @@ const LoginPage = ({ onLogin }) => {
     try {
       // ปรับปรุง Payload: ส่ง student_id เป็น String ตามที่ Backend แจ้ง Error มา
       const payload = {
-        student_id: String(username), 
+        email: String(username), 
         password: String(password)
       };
 
       console.log("🚀 กำลังส่ง Payload ไปยัง Backend:", payload);
 
-      const response = await axios.post(`${API_BASE_URL}/student/login`, payload, {
+      const response = await axios.post(`${API_BASE_URL}/login`, payload, {
         headers: { 'Content-Type': 'application/json' }
       });
       
