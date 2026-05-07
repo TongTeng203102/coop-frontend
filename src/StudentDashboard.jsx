@@ -87,7 +87,9 @@ const LoginPage = ({ onLogin }) => {
       const response = await axios.post(`${API_BASE_URL}/login`, payload, {
         headers: { 'Content-Type': 'application/json' }
       });
-      
+
+      console.log(response)
+
       // ดึง access_token จาก response ตามโครงสร้าง FastAPI
       const token = response.data.access_token;
       
@@ -117,16 +119,16 @@ const LoginPage = ({ onLogin }) => {
           <div className="bg-red-50 w-20 h-20 rounded-[30px] flex items-center justify-center mx-auto mb-6">
             <Lock className="text-[#800000]" size={40} />
           </div>
-          <h1 className="text-2xl font-black text-gray-800 uppercase tracking-tight">Student Login</h1>
+          <h1 className="text-2xl font-black text-gray-800 uppercase tracking-tight">Login</h1>
           <p className="text-gray-400 text-[10px] font-black uppercase mt-2">Co-operative Education</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="text-[10px] font-black text-gray-400 ml-2 uppercase">รหัสนักศึกษา</label>
+            <label className="text-[10px] font-black text-gray-400 ml-2 uppercase">ชื่อผู้ใช้งานหรือรหัสนักศึกษา</label>
             <input 
               type="text" 
               className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold focus:border-[#800000] transition-all" 
-              placeholder="กรอกรหัสนักศึกษา"
+              placeholder="กรอกชื่อผู้ใช้งานหรือรหัสนักศึกษา"
               value={username} 
               onChange={(e) => setUsername(e.target.value)} 
               required 
