@@ -4,7 +4,7 @@ import {
   BarChart3, LogOut, Menu, X, Lock, 
   Factory, FileSearch, AlertCircle, 
   ChevronRight, User, MapPin, Phone, 
-  Building2, Info
+  Building2, Info, Usercog
 } from 'lucide-react';
 
 // --- Configuration ---
