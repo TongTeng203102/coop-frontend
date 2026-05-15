@@ -3,8 +3,8 @@ import axios from 'axios';
 import { 
   BarChart3, LogOut, Menu, X, Lock, 
   Factory, FileSearch, AlertCircle, 
-  ChevronRight, User, MapPin, Phone, 
-  Building2, Info
+  ChevronRight, User, MapPin, 
+  Building2, Info, UserCog 
 } from 'lucide-react';
 
 // --- Configuration ---
@@ -27,6 +27,7 @@ const CompanyManagement = () => {
     const fetchCompanies = async () => {
       try {
         const res = await api.get('/companies');
+        // จัดการข้อมูลที่ได้รับจาก API
         const data = Array.isArray(res.data) ? res.data : (res.data.companies || []);
         setCompanies(data);
       } catch (err) {
@@ -78,12 +79,12 @@ const CompanyManagement = () => {
         )}
       </div>
 
-      {/* --- Modal แสดงรายละเอียด (ปรับปรุงใหม่) --- */}
+      {/* --- Modal แสดงรายละเอียด --- */}
       {selectedCompany && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-300">
             
-            {/* Header Section */}
+            {/* Header */}
             <div className="bg-[#800000] p-8 text-white relative">
               <button 
                 onClick={() => setSelectedCompany(null)}
@@ -108,9 +109,8 @@ const CompanyManagement = () => {
               </div>
             </div>
 
-            {/* Content Section */}
+            {/* Content */}
             <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto bg-white">
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* ที่ตั้ง */}
                 <div className="p-6 bg-gray-50 rounded-[32px] border border-gray-100 flex items-start gap-4">
@@ -125,7 +125,7 @@ const CompanyManagement = () => {
                   </div>
                 </div>
 
-                {/* สายงาน (แทนที่เบอร์โทร) */}
+                {/* สายงาน */}
                 <div className="p-6 bg-gray-50 rounded-[32px] border border-gray-100 flex items-start gap-4">
                   <div className="p-3 bg-white rounded-2xl shadow-sm text-[#800000]">
                     <UserCog size={20} />
@@ -151,28 +151,28 @@ const CompanyManagement = () => {
                     <p className="text-[10px] text-gray-400 font-black uppercase">เบี้ยเลี้ยง</p>
                     <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
                       <span className="w-1.5 h-1.5 bg-[#800000] rounded-full"></span>
-                      {selectedCompany.allowance}
+                      {selectedCompany.allowance || "ไม่มี"}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] text-gray-400 font-black uppercase">ที่พัก</p>
                     <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
                       <span className="w-1.5 h-1.5 bg-[#800000] rounded-full"></span>
-                      {selectedCompany.accommodation}
+                      {selectedCompany.accommodation || "ไม่มี"}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] text-gray-400 font-black uppercase">รถรับส่ง</p>
                     <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
                       <span className="w-1.5 h-1.5 bg-[#800000] rounded-full"></span>
-                      {selectedCompany.shuttle}
+                      {selectedCompany.shuttle || "ไม่มี"}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] text-gray-400 font-black uppercase">สวัสดิการอื่นๆ</p>
                     <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
                       <span className="w-1.5 h-1.5 bg-[#800000] rounded-full"></span>
-                      {selectedCompany.welfare}
+                      {selectedCompany.welfare || "ไม่มี"}
                     </p>
                   </div>
                 </div>
@@ -221,22 +221,23 @@ const LoginPage = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4">
-      <div className="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border border-gray-50 text-center">
+      <div className="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border border-gray-50 text-center relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-2 bg-[#800000]"></div>
         <div className="bg-red-50 w-20 h-20 rounded-[30px] flex items-center justify-center mx-auto mb-6">
           <Lock className="text-[#800000]" size={40} />
         </div>
-        <h1 className="text-2xl font-black text-gray-800 uppercase mb-8 tracking-tighter">เข้าสู่ระบบ</h1>
+        <h1 className="text-2xl font-black text-gray-800 uppercase mb-8">Login</h1>
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           <input 
             type="text" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold focus:border-[#800000] transition-all" 
-            placeholder="อีเมล / ชื่อผู้ใช้" value={username} onChange={(e) => setUsername(e.target.value)} required 
+            placeholder="Username / Email" value={username} onChange={(e) => setUsername(e.target.value)} required 
           />
           <input 
             type="password" className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold focus:border-[#800000] transition-all" 
-            placeholder="รหัสผ่าน" value={password} onChange={(e) => setPassword(e.target.value)} required 
+            placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required 
           />
           <button type="submit" disabled={loading} className="w-full bg-[#800000] text-white py-5 rounded-2xl font-black shadow-xl hover:bg-black transition-all">
-            {loading ? 'กำลังเข้าระบบ...' : 'LOGIN'}
+            {loading ? 'Processing...' : 'SIGN IN'}
           </button>
         </form>
       </div>
@@ -244,74 +245,86 @@ const LoginPage = ({ onLogin }) => {
   );
 };
 
-// --- 3. Main Dashboard ---
+// --- 3. หน้า Dashboard หลัก ---
 const StudentDashboard = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  if (!isLoggedIn) return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+  const handleLoginSuccess = () => setIsLoggedIn(true);
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+  };
+
+  if (!isLoggedIn) return <LoginPage onLogin={handleLoginSuccess} />;
 
   return (
     <div className="flex h-screen bg-[#f1f5f9] font-['Sarabun'] antialiased overflow-hidden">
-      <aside className={`fixed md:relative inset-y-0 left-0 z-40 bg-[#800000] text-white transition-all duration-300 flex flex-col ${isSidebarOpen ? 'w-72 translate-x-0' : 'w-72 -translate-x-full md:translate-x-0 md:w-24'}`}>
+      
+      {isSidebarOpen && (
+        <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setIsSidebarOpen(false)}></div>
+      )}
+
+      <aside className={`
+        fixed md:relative inset-y-0 left-0 z-40 bg-[#800000] text-white transition-all duration-300 flex flex-col
+        ${isSidebarOpen ? 'w-72 translate-x-0' : 'w-72 -translate-x-full md:translate-x-0 md:w-24'}
+      `}>
         <div className="p-8 flex items-center justify-between border-b border-white/10">
-          {(isSidebarOpen || window.innerWidth < 768) && <span className="font-black text-xl uppercase tracking-tighter">CO-OP</span>}
+          {(isSidebarOpen || window.innerWidth < 768) && <span className="font-black text-xl uppercase tracking-tighter">Co-Op</span>}
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/10 rounded-xl">
             {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
+        
         <nav className="flex-1 px-4 mt-8 space-y-2">
           {[
             { id: 'overview', name: 'หน้าหลัก', icon: <BarChart3 size={20}/> },
             { id: 'company', name: 'บริษัท', icon: <Factory size={20}/> },
             { id: 'request', name: 'คำร้อง', icon: <FileSearch size={20}/> }
           ].map(item => (
-            <button key={item.id} onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }} className={`flex items-center w-full p-4 rounded-2xl transition-all ${activeTab === item.id ? 'bg-white text-[#800000] shadow-lg' : 'text-red-100/70 hover:bg-white/5'}`}>
+            <button 
+              key={item.id}
+              onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }} 
+              className={`flex items-center w-full p-4 rounded-2xl transition-all ${activeTab === item.id ? 'bg-white text-[#800000] shadow-lg' : 'text-red-100/70 hover:bg-white/5'}`}
+            >
               {item.icon}
-              {isSidebarOpen && <span className="ml-4 text-xs font-black uppercase">{item.name}</span>}
+              {isSidebarOpen && <span className="ml-4 text-xs font-black uppercase tracking-wider">{item.name}</span>}
             </button>
           ))}
         </nav>
-        <button onClick={() => { localStorage.removeItem('token'); setIsLoggedIn(false); }} className="p-8 flex items-center text-red-200 hover:text-white transition-colors">
-          <LogOut size={20} />
-          {isSidebarOpen && <span className="ml-4 font-black text-xs uppercase">LOGOUT</span>}
-        </button>
+
+        <div className="p-6 border-t border-white/10">
+          <button onClick={handleLogout} className="flex items-center w-full p-4 text-red-200 hover:text-white hover:bg-red-900/50 rounded-2xl transition-all">
+            <LogOut size={20} />
+            {isSidebarOpen && <span className="ml-4 font-black text-xs uppercase">Logout</span>}
+          </button>
+        </div>
       </aside>
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-20 bg-white border-b flex items-center justify-between px-8">
-          <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 bg-gray-50 rounded-lg"><Menu size={20} /></button>
-          <h2 className="font-black text-gray-800 uppercase">{activeTab}</h2>
-          <div className="w-10 h-10 rounded-xl bg-[#800000] flex items-center justify-center text-white font-black"><User size={20} /></div>
+        <header className="h-20 bg-white border-b flex items-center justify-between px-6 md:px-10">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 bg-gray-50 rounded-lg">
+              <Menu size={20} />
+            </button>
+            <h2 className="font-black text-gray-800 uppercase tracking-wide">{activeTab}</h2>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-[#800000] flex items-center justify-center text-white font-black shadow-lg">
+            <User size={20} />
+          </div>
         </header>
 
         <section className="flex-1 overflow-y-auto p-6 md:p-10 bg-gray-50/50">
           <div className="max-w-5xl mx-auto">
             {activeTab === 'overview' && (
-              <div className="bg-gradient-to-br from-[#800000] to-red-900 p-12 rounded-[40px] text-white shadow-2xl relative overflow-hidden">
-                <h3 className="text-3xl font-black mb-2">ยินดีต้อนรับ</h3>
-                <p className="opacity-80 font-medium">จัดการข้อมูลและค้นหาบริษัทที่คุณสนใจได้เลย</p>
+              <div className="bg-gradient-to-r from-[#800000] to-red-900 p-12 rounded-[40px] text-white shadow-2xl relative overflow-hidden">
+                <div className="relative z-10">
+                  <h3 className="text-3xl font-black mb-3">ระบบสหกิจศึกษา</h3>
+                  <p className="opacity-80 font-medium italic">"ยินดีต้อนรับเข้าสู่ระบบจัดการข้อมูลสถานประกอบการ"</p>
+                </div>
                 <Factory className="absolute -right-10 -bottom-10 w-64 h-64 text-white/10 rotate-12" />
               </div>
             )}
             {activeTab === 'company' && <CompanyManagement />}
             {activeTab === 'request' && (
-              <div className="bg-white p-20 rounded-[40px] text-center border-2 border-dashed border-gray-100">
-                <FileSearch size={48} className="mx-auto mb-4 text-gray-300" />
-                <h3 className="font-black text-gray-800">ไม่พบรายการคำร้อง</h3>
-              </div>
-            )}
-          </div>
-        </section>
-      </main>
-      
-      <style dangerouslySetInnerHTML={{ __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap');
-        body { font-family: 'Sarabun', sans-serif; }
-      `}} />
-    </div>
-  );
-};
-
-export default StudentDashboard;
