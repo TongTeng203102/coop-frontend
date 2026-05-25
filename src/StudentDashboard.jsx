@@ -4,8 +4,8 @@ import {
   BarChart3, LogOut, Menu, X, Lock, 
   Factory, FileSearch, AlertCircle, 
   ChevronRight, User, MapPin, Phone, 
-  Building2, Info, Usercog, Filter,
-  CheckCircle2, Clock, XCircle, Calendar, GraduationCap
+  Building2, Info, Filter,
+  CheckCircle2, Clock, Calendar, GraduationCap
 } from 'lucide-react';
 
 // --- Configuration ---
@@ -17,6 +17,29 @@ api.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+// --- Component โลโก้หุ่นยนต์เฟืองสีแดง (แปลงมาจากรูปภาพที่คุณอัปโหลด) ---
+const RobotLogo = ({ className = "w-10 h-10" }) => (
+  <svg className={className} viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* ฟันเฟืองสีแดงรอบนอก */}
+    <path d="M482.3 221.7l-35.9-5.9c-3.9-15.6-9.9-30.4-17.7-44l21.3-29.4c6.3-8.7 5.1-20.9-2.9-28.2l-32.9-30c-7.9-7.2-20.2-7.2-28 0l-22.5 19.3c-14.1-8.9-29.6-15.6-46.1-19.8l-7-35.7C312 36.5 302 28 290.3 28h-44.5c-11.7 0-21.7 8.5-23.4 20l-7 35.7c-16.5 4.2-32 10.9-46.1 19.8L146.8 84.2c-7.8-7.2-20.1-7.2-28 0l-32.9 30c-8 7.3-9.2 19.5-2.9 28.2l21.3 29.4c-7.8 13.6-13.8 28.4-17.7 44l-35.9 5.9C39 223.4 30.5 233.1 30.5 244.7v44.5c0 11.6 8.5 21.3 20.2 23l35.9 5.9c3.9 15.6 9.9 30.4 17.7 44l-21.3 29.4c-6.3 8.7-5.1 20.9 2.9 28.2l32.9 30c7.9 7.2 20.2 7.2 28 0l22.5-19.3c14.1 8.9 29.6 15.6 46.1 19.8l7 35.7c1.7 11.5 11.7 20 23.4 20h44.5c11.7 0 21.7-8.5 23.4-20l7-35.7c16.5-4.2 32-10.9 46.1-19.8l22.5 19.3c7.8 7.2 20.1 7.2 28 0l32.9-30c8-7.3 9.2-19.5 2.9-28.2l-21.3-29.4c7.8-13.6 13.8-28.4 17.7-44l35.9-5.9c11.7-1.7 20.2-11.4 20.2-23v-44.5c0-11.6-8.5-21.3-20.2-23z" fill="#ff4d4d" stroke="#000" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round"/>
+    {/* วงกลมสีขาวตรงกลาง */}
+    <circle cx="256" cy="256" r="135" fill="#fff" stroke="#000" strokeWidth="16"/>
+    {/* หัวหุ่นยนต์สี่เหลี่ยม */}
+    <rect x="180" y="210" width="152" height="100" rx="25" fill="#e0e0e0" stroke="#000" strokeWidth="16"/>
+    {/* ตาหุ่นยนต์สองข้าง */}
+    <circle cx="225" cy="260" r="14" fill="#000"/>
+    <circle cx="287" cy="260" r="14" fill="#000"/>
+    {/* หูหุ่นยนต์ด้านซ้ายและขวา */}
+    <rect x="148" y="235" width="32" height="50" rx="16" fill="#b0b0b0" stroke="#000" strokeWidth="16"/>
+    <rect x="332" y="235" width="32" height="50" rx="16" fill="#b0b0b0" stroke="#000" strokeWidth="16"/>
+    {/* เสาอากาศด้านบน */}
+    <line x1="256" y1="210" x2="256" y2="175" stroke="#000" strokeWidth="16" strokeLinecap="round"/>
+    <circle cx="256" cy="160" r="18" fill="#ff4d4d" stroke="#000" strokeWidth="12"/>
+    {/* ปากหุ่นยนต์ด้านล่าง */}
+    <line x1="230" y1="290" x2="282" y2="290" stroke="#000" strokeWidth="8" strokeLinecap="round"/>
+  </svg>
+);
 
 // --- 1. ส่วนแสดงข้อมูลสถานประกอบการ ---
 const CompanyManagement = () => {
@@ -251,7 +274,6 @@ const LoginPage = ({ onLogin }) => {
       const token = response.data.access_token;
       if (token) {
         localStorage.setItem('token', token);
-        // บันทึกรหัสนักศึกษาลง localStorage ไว้ใช้แสดงโปรไฟล์
         localStorage.setItem('student_id', username);
         onLogin();
       }
@@ -265,8 +287,9 @@ const LoginPage = ({ onLogin }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4">
       <div className="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border border-gray-50 text-center">
-        <div className="bg-red-50 w-20 h-20 rounded-[30px] flex items-center justify-center mx-auto mb-6">
-          <Lock className="text-[#800000]" size={40} />
+        {/* เปลี่ยนไอคอนหน้า Login ให้ล้อไปกับธีมโลโก้หุ่นยนต์ */}
+        <div className="w-24 h-24 flex items-center justify-center mx-auto mb-6">
+          <RobotLogo className="w-20 h-20" />
         </div>
         <h1 className="text-2xl font-black text-gray-800 uppercase mb-8 tracking-tighter">เข้าสู่ระบบ</h1>
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
@@ -293,21 +316,34 @@ const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  // ดึงรหัสนักศึกษามาใช้แสดงผล
   const currentStudentId = localStorage.getItem('student_id') || '65100521';
 
   if (!isLoggedIn) return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
 
   return (
     <div className="flex h-screen bg-[#f1f5f9] font-['Sarabun'] antialiased overflow-hidden">
-      {/* Sidebar */}
+      {/* Sidebar เมนูด้านซ้าย */}
       <aside className={`fixed md:relative inset-y-0 left-0 z-40 bg-[#800000] text-white transition-all duration-300 flex flex-col ${isSidebarOpen ? 'w-72 translate-x-0' : 'w-72 -translate-x-full md:translate-x-0 md:w-24'}`}>
-        <div className="p-8 flex items-center justify-between border-b border-white/10">
-          {(isSidebarOpen || window.innerWidth < 768) && <span className="font-black text-xl uppercase tracking-tighter">CO-OP</span>}
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/10 rounded-xl">
-            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+        
+        {/* ส่วนหัว Sidebar: 🛠️ เปลี่ยนจากข้อความ CO-OP เป็นโลโก้หุ่นยนต์ฟันเฟืองสีแดงตามรูปภาพ */}
+        <div className="p-6 flex items-center justify-center border-b border-white/10 relative h-24">
+          <div className="flex items-center gap-3">
+            <RobotLogo className="w-12 h-12 drop-shadow-md" />
+            {/* แสดงชื่อระบบถ้ายืดแถบเมนูออก */}
+            {(isSidebarOpen || window.innerWidth < 768) && (
+              <span className="font-black text-xl uppercase tracking-tighter text-white animate-in fade-in duration-300">
+                CO-OP SYSTEM
+              </span>
+            )}
+          </div>
+          {isSidebarOpen && (
+            <button onClick={() => setIsSidebarOpen(false)} className="absolute right-4 md:hidden p-2 hover:bg-white/10 rounded-xl">
+              <X size={20} />
+            </button>
+          )}
         </div>
+
+        {/* รายการเมนูนำทาง */}
         <nav className="flex-1 px-4 mt-8 space-y-2">
           {[
             { id: 'overview', name: 'หน้าหลัก', icon: <BarChart3 size={20}/> },
@@ -320,24 +356,31 @@ const StudentDashboard = () => {
             </button>
           ))}
         </nav>
-        <button onClick={() => { localStorage.clear(); setIsLoggedIn(false); }} className="p-8 flex items-center text-red-200 hover:text-white transition-colors">
+
+        {/* ปุ่มออกจากระบบ */}
+        <button onClick={() => { localStorage.clear(); setIsLoggedIn(false); }} className="p-8 flex items-center text-red-200 hover:text-white transition-colors border-t border-white/5">
           <LogOut size={20} />
           {isSidebarOpen && <span className="ml-4 font-black text-xs uppercase">LOGOUT</span>}
         </button>
       </aside>
 
-      {/* Main Content Area */}
+      {/* พื้นที่เนื้อหาหลักด้านขวา */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Header พร้อมตัวบ่งชี้สถานะออนไลน์ */}
+        {/* Header แถบบน */}
         <header className="h-20 bg-white border-b flex items-center justify-between px-8 shrink-0">
-          <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 bg-gray-50 rounded-lg"><Menu size={20} /></button>
-          <h2 className="font-black text-gray-800 uppercase tracking-wide">{activeTab === 'overview' ? 'Dashboard' : activeTab}</h2>
+          <div className="flex items-center gap-4">
+            {!isSidebarOpen && (
+              <button onClick={() => setIsSidebarOpen(true)} className="p-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl transition-all">
+                <Menu size={20} />
+              </button>
+            )}
+            <h2 className="font-black text-gray-800 uppercase tracking-wide">{activeTab === 'overview' ? 'Dashboard' : activeTab}</h2>
+          </div>
           
-          {/* ส่วนแสดงโปรไฟล์และสถานะออนไลน์ */}
+          {/* ข้อมูลโปรไฟล์และสถานะ Online ไฟเขียวกระพริบ */}
           <div className="flex items-center gap-3 bg-gray-50 pl-4 pr-3 py-1.5 rounded-2xl border border-gray-100">
             <div className="text-right hidden sm:block">
               <p className="text-xs font-black text-gray-700">ID: {currentStudentId}</p>
-              {/* สัญญาณไฟกระพริบออนไลน์ */}
               <div className="flex items-center justify-end gap-1.5 mt-0.5">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 <span className="text-[10px] font-bold text-green-600 uppercase">ออนไลน์</span>
@@ -349,7 +392,7 @@ const StudentDashboard = () => {
           </div>
         </header>
 
-        {/* Section เนื้อหาหลักภายใน Dashboard */}
+        {/* สลับหน้าการทำงานตาม Tab */}
         <section className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50/50">
           <div className="max-w-5xl mx-auto space-y-6">
             
@@ -357,14 +400,14 @@ const StudentDashboard = () => {
               <>
                 {/* 1. ส่วนต้อนรับและข้อมูลส่วนตัวนักศึกษา */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* แถบสีแดงต้อนรับ */}
-                  <div className="lg:col-span-2 bg-gradient-to-br from-[#800000] to-red-950 p-8 md:p-10 rounded-[35px] text-white shadow-xl relative overflow-hidden flex flex-col justify-center">
+                  {/* แบนเนอร์แดงต้อนรับ */}
+                  <div className="lg:col-span-2 bg-gradient-to-br from-[#800000] to-red-955 p-8 md:p-10 rounded-[35px] text-white shadow-xl relative overflow-hidden flex flex-col justify-center">
                     <h3 className="text-2xl md:text-3xl font-black mb-2">สวัสดีนักศึกษาใหม่!</h3>
                     <p className="opacity-80 text-xs md:text-sm font-medium max-w-sm leading-relaxed">ยินดีต้อนรับเข้าสู่ระบบจัดการสหกิจศึกษา ตรวจสอบสถานะคำร้องและข้อมูลบริษัทชั้นนำได้ทันที</p>
                     <Factory className="absolute -right-6 -bottom-10 w-48 h-48 text-white/5 rotate-12 pointer-events-none" />
                   </div>
 
-                  {/* 🛠️ [เพิ่ม]: บัตรข้อมูลส่วนตัวนักศึกษา */}
+                  {/* ข้อมูลส่วนตัวของนักศึกษา */}
                   <div className="bg-white p-6 rounded-[35px] shadow-sm border border-gray-100 flex flex-col justify-between">
                     <div>
                       <span className="text-[10px] bg-red-50 text-[#800000] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">ข้อมูลส่วนตัวนักศึกษา</span>
@@ -377,9 +420,9 @@ const StudentDashboard = () => {
                       </div>
                     </div>
                     <div className="border-t border-gray-50 pt-3 mt-4 space-y-1.5 text-xs text-gray-500 font-bold">
-                      <p>สำนักวิชา: <span className="text-gray-700 font-black">วิศวกรรมศาสตร์และเทคโนโลยี</span></p>
-                      <p>สาขา: <span className="text-gray-700 font-black">วิศวกรรมคอมพิวเตอร์และปัญญาประดิษฐ์</span></p>
-                      <p>ชั้นปี: <span className="text-gray-700 font-black">ปีที่ 4 </span></p>
+                      <p>คณะ: <span className="text-gray-700 font-black">วิทยาศาสตร์และเทคโนโลยี</span></p>
+                      <p>สาขา: <span className="text-gray-700 font-black">วิทยาการคอมพิวเตอร์</span></p>
+                      <p>ชั้นปี: <span className="text-gray-700 font-black">ปีที่ 4 (ภาคปกติ)</span></p>
                     </div>
                   </div>
                 </div>
@@ -389,7 +432,6 @@ const StudentDashboard = () => {
                   <h4 className="text-gray-800 font-black mb-6 flex items-center gap-2"><BarChart3 size={20} className="text-[#800000]"/> กราฟสรุปสถานะคำร้องทั้งหมด</h4>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* การ์ดสถานะที่ 1: อนุมัติ */}
                     <div className="p-5 bg-emerald-50/50 border border-emerald-100 rounded-2xl flex items-center justify-between">
                       <div>
                         <p className="text-xs font-bold text-emerald-600 mb-1">อนุมัติแล้ว (Approved)</p>
@@ -398,7 +440,6 @@ const StudentDashboard = () => {
                       <div className="w-16 h-16 bg-white rounded-full border-4 border-emerald-400 flex items-center justify-center text-xs font-black text-emerald-700 shadow-sm">100%</div>
                     </div>
 
-                    {/* การ์ดสถานะที่ 2: รอตรวจสอบ */}
                     <div className="p-5 bg-amber-50/50 border border-amber-100 rounded-2xl flex items-center justify-between">
                       <div>
                         <p className="text-xs font-bold text-amber-600 mb-1">กำลังตรวจสอบ (Pending)</p>
@@ -407,7 +448,6 @@ const StudentDashboard = () => {
                       <div className="w-16 h-16 bg-white rounded-full border-4 border-amber-300 flex items-center justify-center text-xs font-black text-amber-700 shadow-sm">50%</div>
                     </div>
 
-                    {/* การ์ดสถานะที่ 3: ปฏิเสธ */}
                     <div className="p-5 bg-red-50/40 border border-red-100 rounded-2xl flex items-center justify-between">
                       <div>
                         <p className="text-xs font-bold text-red-600 mb-1">ปฏิเสธ/แก้ไข (Rejected)</p>
@@ -417,13 +457,12 @@ const StudentDashboard = () => {
                     </div>
                   </div>
 
-                  {/* สรุปเป็นแผนภูมิแท่งจำลองระบายสี */}
                   <div className="mt-6 pt-6 border-t border-gray-50">
                     <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">เปรียบเทียบอัตราส่วนคำร้อง</p>
                     <div className="w-full h-4 bg-gray-100 rounded-full flex overflow-hidden">
-                      <div className="h-full bg-emerald-500 transition-all" style={{width: '66%'}} title="อนุมัติแล้ว"></div>
-                      <div className="h-full bg-amber-400 transition-all" style={{width: '34%'}} title="กำลังตรวจสอบ"></div>
-                      <div className="h-full bg-red-400 transition-all" style={{width: '0%'}} title="ปฏิเสธ"></div>
+                      <div className="h-full bg-emerald-500 transition-all" style={{width: '66%'}}></div>
+                      <div className="h-full bg-amber-400 transition-all" style={{width: '34%'}}></div>
+                      <div className="h-full bg-red-400 transition-all" style={{width: '0%'}}></div>
                     </div>
                     <div className="flex gap-4 mt-3 text-[11px] font-bold text-gray-500">
                       <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span> อนุมัติ (66%)</span>
@@ -432,12 +471,11 @@ const StudentDashboard = () => {
                   </div>
                 </div>
 
-                {/* 3. ไทม์ไลน์ขั้นตอนการฝึกงาน (Timeline) */}
+                {/* 3. ไทม์ไลน์ขั้นตอนการฝึกงาน */}
                 <div className="bg-white p-6 md:p-8 rounded-[35px] shadow-sm border border-gray-100">
                   <h4 className="text-gray-800 font-black mb-8 flex items-center gap-2"><Calendar size={20} className="text-[#800000]"/> ไทม์ไลน์ขั้นตอนการดำเนินงาน (Co-op Timeline)</h4>
                   
                   <div className="relative border-l-2 border-red-100 ml-4 md:ml-6 space-y-8 pb-4">
-                    {/* Step 1 */}
                     <div className="relative pl-8">
                       <div className="absolute -left-[13px] top-0 bg-emerald-500 text-white p-1 rounded-full"><CheckCircle2 size={16} /></div>
                       <div>
@@ -447,7 +485,6 @@ const StudentDashboard = () => {
                       </div>
                     </div>
 
-                    {/* Step 2 */}
                     <div className="relative pl-8">
                       <div className="absolute -left-[13px] top-0 bg-amber-400 text-white p-1 rounded-full"><Clock size={16} /></div>
                       <div>
@@ -457,7 +494,6 @@ const StudentDashboard = () => {
                       </div>
                     </div>
 
-                    {/* Step 3 */}
                     <div className="relative pl-8">
                       <div className="absolute -left-[13px] top-0 bg-gray-200 text-gray-400 p-1 rounded-full"><Clock size={16} /></div>
                       <div className="opacity-50">
@@ -467,7 +503,6 @@ const StudentDashboard = () => {
                       </div>
                     </div>
 
-                    {/* Step 4 */}
                     <div className="relative pl-8">
                       <div className="absolute -left-[13px] top-0 bg-gray-200 text-gray-400 p-1 rounded-full"><Clock size={16} /></div>
                       <div className="opacity-50">
@@ -493,6 +528,7 @@ const StudentDashboard = () => {
         </section>
       </main>
       
+      {/* ฝังฟอนต์ Sarabun สไตล์โมเดิร์น */}
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap');
         body { font-family: 'Sarabun', sans-serif; }
