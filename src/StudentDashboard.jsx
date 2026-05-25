@@ -179,23 +179,19 @@ const LoginPage = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // ⭐ [จุดที่แก้ไข]: ปรับปรุงระบบการส่งข้อมูลให้เข้ากับ FastAPI OAuth2
+  // 🛠️ [จุดที่แก้ไข]: ปรับกลับมาใช้รูปแบบ JSON Object เพื่อแก้ปัญหา Error 422 ของระบบหลังบ้าน
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // 1. เปลี่ยนมาสร้างเป็น Form Data แทนวัตถุ JSON ธรรมดา
-      const formData = new FormData();
-      formData.append('username', String(username)); // FastAPI บังคับรับฟิลด์ไอดีในชื่อคีย์ 'username'
-      formData.append('password', String(password));
+      // ปรับโครงสร้างข้อมูลส่งเป็น JSON Object ตามโครงสร้างดั้งเดิมของ API
+      const payload = { 
+        email: String(username), 
+        password: String(password) 
+      };
 
-      // 2. ยิง API โดยแนบฟอร์มและบอก Content-Type เป็น multipart/form-data
-      const response = await axios.post(`${API_BASE_URL}/login`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
+      const response = await axios.post(`${API_BASE_URL}/login`, payload);
+      
       const token = response.data.access_token;
       if (token) {
         localStorage.setItem('token', token);
