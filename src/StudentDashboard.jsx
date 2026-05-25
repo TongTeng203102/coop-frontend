@@ -4,7 +4,7 @@ import {
   BarChart3, LogOut, Menu, X, Lock, 
   Factory, FileSearch, AlertCircle, 
   ChevronRight, User, MapPin, Phone, 
-  Building2, Info, Usercog
+  Building2, Info, Usercog, Filter
 } from 'lucide-react';
 
 // --- Configuration ---
@@ -17,12 +17,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// --- 1. ส่วนแสดงข้อมูลสถานประกอบการ ---
+// --- 1. ส่วนแสดงข้อมูลสถานประกอบการ (เพิ่มระบบตัวกรองด้านขวา) ---
 const CompanyManagement = () => {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // 🛠️ [เพิ่มสเตท]: สำหรับเปิด/ปิดแถบตัวกรอง และจำค่าประเภทที่เลือกกรอง
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [filterIndustry, setFilterIndustry] = useState('All');
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -47,31 +51,93 @@ const CompanyManagement = () => {
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
+  // 🛠️ [เพิ่มฟังก์ชัน]: กรองข้อมูลฝั่ง Frontend ตามประเภทอุตสาหกรรมที่เลือก
+  const filteredCompanies = companies.filter(company => {
+    if (filterIndustry === 'All') return true;
+    if (filterIndustry === 'Industry') return company.industry?.includes('อุตสาหกรรม') || company.industry?.toLowerCase().includes('manufacture');
+    if (filterIndustry === 'IT') return company.industry?.includes('เทคโนโลยี') || company.industry?.toLowerCase().includes('it') || company.industry?.toLowerCase().includes('tech');
+    if (filterIndustry === 'Other') return !company.industry;
+    return true;
+  });
+
   return (
     <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      {/* ส่วนหัวและตัวกรองมุมขวา */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 relative">
         <h3 className="text-[#800000] font-black flex items-center gap-2 text-lg">
           <Factory size={24}/> รายชื่อสถานประกอบการ
         </h3>
         
-        <div className="relative">
-          <input 
-            type="text"
-            placeholder="ค้นหาบริษัท (เช่น CP)..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full md:w-64 px-4 py-2 text-sm bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#800000] font-bold"
-          />
+        {/* กลุ่มค้นหาและไอคอนตัวกรองด้านขวา */}
+        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+          <div className="relative flex-1 md:flex-none">
+            <input 
+              type="text"
+              placeholder="ค้นหาบริษัท (เช่น CP)..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full md:w-64 px-4 py-2 text-sm bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#800000] font-bold"
+            />
+          </div>
+          
+          {/* 🛠️ [เพิ่มปุ่มไอคอนตัวกรองมุมขวา] */}
+          <div className="relative">
+            <button 
+              onClick={() => setShowFilterMenu(!showFilterMenu)}
+              className={`p-2.5 rounded-xl border transition-all flex items-center justify-center ${showFilterMenu ? 'bg-[#800000] text-white border-[#800000]' : 'bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100'}`}
+              title="ตัวกรองข้อมูล"
+            >
+              <Filter size={18} />
+            </button>
+
+            {/* เมนูตัวกรองที่จะเด้งลงมาเมื่อกดปุ่ม */}
+            {showFilterMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <p className="px-4 py-1.5 text-[10px] font-black text-gray-400 uppercase tracking-wider">ประเภทธุรกิจ</p>
+                {[
+                  { id: 'All', name: 'ทั้งหมด' },
+                  { id: 'Industry', name: 'โรงงาน / อุตสาหกรรม' },
+                  { id: 'IT', name: 'IT / เทคโนโลยี' },
+                  { id: 'Other', name: 'ทั่วไป / ไม่ระบุ' }
+                ].map((type) => (
+                  <button
+                    key={type.id}
+                    onClick={() => {
+                      setFilterIndustry(type.id);
+                      setShowFilterMenu(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors ${filterIndustry === type.id ? 'bg-red-50 text-[#800000]' : 'text-gray-600 hover:bg-gray-50'}`}
+                  >
+                    • {type.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* แสดง Badge ตัวกรองปัจจุบันถ้ามีการเลือกไว้ */}
+      {filterIndustry !== 'All' && (
+        <div className="mb-4 flex items-center gap-2">
+          <span className="text-xs font-bold text-gray-400">ตัวกรองปัจจุบัน:</span>
+          <span className="inline-flex items-center gap-1 bg-red-50 text-[#800000] text-xs font-black px-3 py-1 rounded-full border border-red-100">
+            {filterIndustry === 'Industry' && 'โรงงาน / อุตสาหกรรม'}
+            {filterIndustry === 'IT' && 'IT / เทคโนโลยี'}
+            {filterIndustry === 'Other' && 'ทั่วไป / ไม่ระบุ'}
+            <X size={12} className="cursor-pointer ml-1" onClick={() => setFilterIndustry('All')} />
+          </span>
+        </div>
+      )}
+
+      {/* รายการบริษัท */}
       <div className="space-y-4">
         {loading ? (
           <div className="text-center py-10 text-gray-400 font-bold">กำลังดึงข้อมูล...</div>
-        ) : companies.length === 0 ? (
-          <div className="text-center py-10 text-gray-400 font-bold">ไม่พบข้อมูลสถานประกอบการ</div>
+        ) : filteredCompanies.length === 0 ? (
+          <div className="text-center py-10 text-gray-400 font-bold">ไม่พบข้อมูลสถานประกอบการในกลุ่มนี้</div>
         ) : (
-          companies.map((company, index) => (
+          filteredCompanies.map((company, index) => (
             <div 
               key={company.id || index} 
               onClick={() => setSelectedCompany(company)}
@@ -83,9 +149,16 @@ const CompanyManagement = () => {
                 </div>
                 <div>
                   <p className="font-black text-gray-800">{company.company_name}</p>
-                  <p className="text-xs text-gray-400 font-bold flex items-center gap-1">
-                    <MapPin size={12} /> {company.address}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
+                    <p className="text-xs text-gray-400 font-bold flex items-center gap-1">
+                      <MapPin size={12} /> {company.address}
+                    </p>
+                    {company.industry && (
+                      <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-bold">
+                        {company.industry}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <ChevronRight className="text-gray-300 group-hover:text-[#800000]" />
@@ -179,12 +252,10 @@ const LoginPage = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 💖 [แก้ไขตรงนี้ให้ตรงฐานข้อมูล]: ส่งแบบ JSON Object และเปลี่ยนชื่อคีย์ให้ตรงเป๊ะตามฟิลด์ DB
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // เปลี่ยนจาก email เป็น username ตามหัวตารางใน Database
       const payload = { 
         username: String(username), 
         password: String(password) 
