@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 
 // --- Configuration ---
-// ใช้ URL โดเมนหลักของ Vercel (ตัดพาร์ท /docs ออก เพื่อให้เป็น Base URL ที่ถูกต้อง)
 const API_BASE_URL = "https://coop-backend-02.vercel.app";
 
 const api = axios.create({ baseURL: API_BASE_URL });
@@ -23,13 +22,12 @@ const CompanyManagement = () => {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCompany, setSelectedCompany] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(''); // State สำหรับเก็บคำค้นหา (เช่น CP)
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
         setLoading(true);
-        // ส่ง query parameter ตัว search ไปที่ FastAPI อัตโนมัติเมื่อพิมพ์ค้นหา
         const res = await api.get('/companies', {
           params: searchTerm ? { search: searchTerm } : {}
         });
@@ -42,7 +40,6 @@ const CompanyManagement = () => {
       }
     };
 
-    // ใช้ระบบ Debounce เล็กน้อย เพื่อไม่ให้ยิง API ถี่เกินไปตอนกำลังพิมพ์
     const delayDebounceFn = setTimeout(() => {
       fetchCompanies();
     }, 400);
@@ -57,7 +54,6 @@ const CompanyManagement = () => {
           <Factory size={24}/> รายชื่อสถานประกอบการ
         </h3>
         
-        {/* ช่องอินพุตสำหรับพิมพ์ค้นหาบริษัท (เช่นพิมพ์ CP ระบบจะไปดึงเฉพาะเครือ CP มา) */}
         <div className="relative">
           <input 
             type="text"
@@ -102,7 +98,6 @@ const CompanyManagement = () => {
       {selectedCompany && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden relative">
-            {/* Header */}
             <div className="bg-[#800000] p-8 text-white">
               <button onClick={() => setSelectedCompany(null)} className="absolute top-6 right-6 p-2 bg-white/10 rounded-full hover:bg-white/20">
                 <X size={20} />
@@ -120,7 +115,6 @@ const CompanyManagement = () => {
               </div>
             </div>
 
-            {/* Content */}
             <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-5 bg-gray-50 rounded-3xl border border-gray-100 flex gap-3">
@@ -142,7 +136,6 @@ const CompanyManagement = () => {
                 </div>
               </div>
 
-              {/* ส่วนสวัสดิการ */}
               <div className="p-6 bg-red-50/30 rounded-3xl border border-red-100">
                 <p className="text-[10px] font-black text-[#800000] uppercase mb-3 flex items-center gap-2">
                   <Info size={14} /> รายละเอียดและสวัสดิการ
@@ -186,18 +179,30 @@ const LoginPage = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // ⭐ [จุดที่แก้ไข]: ปรับปรุงระบบการส่งข้อมูลให้เข้ากับ FastAPI OAuth2
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const payload = { email: String(username), password: String(password) };
-      const response = await axios.post(`${API_BASE_URL}/login`, payload);
+      // 1. เปลี่ยนมาสร้างเป็น Form Data แทนวัตถุ JSON ธรรมดา
+      const formData = new FormData();
+      formData.append('username', String(username)); // FastAPI บังคับรับฟิลด์ไอดีในชื่อคีย์ 'username'
+      formData.append('password', String(password));
+
+      // 2. ยิง API โดยแนบฟอร์มและบอก Content-Type เป็น multipart/form-data
+      const response = await axios.post(`${API_BASE_URL}/login`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
       const token = response.data.access_token;
       if (token) {
         localStorage.setItem('token', token);
         onLogin({ ...response.data, student_id: username });
       }
     } catch (error) {
+      console.error("Login Error details:", error.response?.data);
       alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
     } finally {
       setLoading(false);
