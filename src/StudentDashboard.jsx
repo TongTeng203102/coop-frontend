@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 
 // --- Configuration ---
+// ใช้ URL โดเมนหลักของ Vercel (ตัดพาร์ท /docs ออก เพื่อให้เป็น Base URL ที่ถูกต้อง)
 const API_BASE_URL = "https://coop-backend-02.vercel.app";
 
 const api = axios.create({ baseURL: API_BASE_URL });
@@ -22,11 +23,16 @@ const CompanyManagement = () => {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCompany, setSelectedCompany] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(''); // State สำหรับเก็บคำค้นหา (เช่น CP)
 
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const res = await api.get('/companies');
+        setLoading(true);
+        // ส่ง query parameter ตัว search ไปที่ FastAPI อัตโนมัติเมื่อพิมพ์ค้นหา
+        const res = await api.get('/companies', {
+          params: searchTerm ? { search: searchTerm } : {}
+        });
         const data = Array.isArray(res.data) ? res.data : (res.data.companies || []);
         setCompanies(data);
       } catch (err) {
@@ -35,18 +41,39 @@ const CompanyManagement = () => {
         setLoading(false);
       }
     };
-    fetchCompanies();
-  }, []);
+
+    // ใช้ระบบ Debounce เล็กน้อย เพื่อไม่ให้ยิง API ถี่เกินไปตอนกำลังพิมพ์
+    const delayDebounceFn = setTimeout(() => {
+      fetchCompanies();
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
 
   return (
     <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
-      <h3 className="text-[#800000] font-black flex items-center gap-2 text-lg mb-6">
-        <Factory size={24}/> รายชื่อสถานประกอบการ
-      </h3>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <h3 className="text-[#800000] font-black flex items-center gap-2 text-lg">
+          <Factory size={24}/> รายชื่อสถานประกอบการ
+        </h3>
+        
+        {/* ช่องอินพุตสำหรับพิมพ์ค้นหาบริษัท (เช่นพิมพ์ CP ระบบจะไปดึงเฉพาะเครือ CP มา) */}
+        <div className="relative">
+          <input 
+            type="text"
+            placeholder="ค้นหาบริษัท (เช่น CP)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full md:w-64 px-4 py-2 text-sm bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#800000] font-bold"
+          />
+        </div>
+      </div>
 
       <div className="space-y-4">
         {loading ? (
-          <div className="text-center py-10">กำลังดึงข้อมูล...</div>
+          <div className="text-center py-10 text-gray-400 font-bold">กำลังดึงข้อมูล...</div>
+        ) : companies.length === 0 ? (
+          <div className="text-center py-10 text-gray-400 font-bold">ไม่พบข้อมูลสถานประกอบการ</div>
         ) : (
           companies.map((company, index) => (
             <div 
@@ -59,7 +86,6 @@ const CompanyManagement = () => {
                   {index + 1}
                 </div>
                 <div>
-                  {/* แก้เป็น company_name ตาม API */}
                   <p className="font-black text-gray-800">{company.company_name}</p>
                   <p className="text-xs text-gray-400 font-bold flex items-center gap-1">
                     <MapPin size={12} /> {company.address}
@@ -88,7 +114,7 @@ const CompanyManagement = () => {
                 <div>
                   <h4 className="text-xl md:text-2xl font-black leading-tight">{selectedCompany.company_name}</h4>
                   <span className="inline-block mt-1 px-3 py-1 bg-white/20 rounded-full text-xs font-bold">
-                    {selectedCompany.industry}
+                    {selectedCompany.industry || "ทั่วไป"}
                   </span>
                 </div>
               </div>
@@ -116,7 +142,7 @@ const CompanyManagement = () => {
                 </div>
               </div>
 
-              {/* ส่วนสวัสดิการที่ดึงตามชื่อตัวแปรจริงของคุณ */}
+              {/* ส่วนสวัสดิการ */}
               <div className="p-6 bg-red-50/30 rounded-3xl border border-red-100">
                 <p className="text-[10px] font-black text-[#800000] uppercase mb-3 flex items-center gap-2">
                   <Info size={14} /> รายละเอียดและสวัสดิการ
@@ -124,19 +150,19 @@ const CompanyManagement = () => {
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <div>
                     <p className="text-[10px] text-gray-400 font-bold uppercase">เบี้ยเลี้ยง</p>
-                    <p className="text-sm font-bold text-gray-700">{selectedCompany.allowance}</p>
+                    <p className="text-sm font-bold text-gray-700">{selectedCompany.allowance || "ไม่มี"}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-gray-400 font-bold uppercase">ที่พัก</p>
-                    <p className="text-sm font-bold text-gray-700">{selectedCompany.accommodation}</p>
+                    <p className="text-sm font-bold text-gray-700">{selectedCompany.accommodation || "ไม่มี"}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-gray-400 font-bold uppercase">รถรับส่ง</p>
-                    <p className="text-sm font-bold text-gray-700">{selectedCompany.shuttle}</p>
+                    <p className="text-sm font-bold text-gray-700">{selectedCompany.shuttle || "ไม่มี"}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-gray-400 font-bold uppercase">สวัสดิการอื่นๆ</p>
-                    <p className="text-sm font-bold text-gray-700">{selectedCompany.welfare}</p>
+                    <p className="text-sm font-bold text-gray-700">{selectedCompany.welfare || "ไม่มี"}</p>
                   </div>
                 </div>
               </div>
