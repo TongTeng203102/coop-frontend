@@ -179,14 +179,14 @@ const LoginPage = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 🛠️ [จุดที่แก้ไข]: ปรับกลับมาใช้รูปแบบ JSON Object เพื่อแก้ปัญหา Error 422 ของระบบหลังบ้าน
+  // 💖 [แก้ไขตรงนี้ให้ตรงฐานข้อมูล]: ส่งแบบ JSON Object และเปลี่ยนชื่อคีย์ให้ตรงเป๊ะตามฟิลด์ DB
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // ปรับโครงสร้างข้อมูลส่งเป็น JSON Object ตามโครงสร้างดั้งเดิมของ API
+      // เปลี่ยนจาก email เป็น username ตามหัวตารางใน Database
       const payload = { 
-        email: String(username), 
+        username: String(username), 
         password: String(password) 
       };
 
