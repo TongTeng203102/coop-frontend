@@ -377,8 +377,8 @@ const StudentDashboard = () => {
                       </div>
                     </div>
                     <div className="border-t border-gray-50 pt-3 mt-4 space-y-1.5 text-xs text-gray-500 font-bold">
-                      <p>คณะ: <span className="text-gray-700 font-black">วิทยาศาสตร์และเทคโนโลยี</span></p>
-                      <p>สาขา: <span className="text-gray-700 font-black">วิทยาการคอมพิวเตอร์</span></p>
+                      <p>สำนักวิชา: <span className="text-gray-700 font-black">วิศวกรรมศาสตร์และเทคโนโลยี</span></p>
+                      <p>สาขา: <span className="text-gray-700 font-black">วิศวกรรมคอมพิวเตอร์และปัญญาประดิษฐ์</span></p>
                       <p>ชั้นปี: <span className="text-gray-700 font-black">ปีที่ 4 (ภาคปกติ)</span></p>
                     </div>
                   </div>
