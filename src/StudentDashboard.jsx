@@ -18,25 +18,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// --- Component โลโก้หุ่นยนต์เฟืองสีแดง (แปลงมาจากรูปภาพที่คุณอัปโหลด) ---
+// --- Component โลโก้หุ่นยนต์เฟืองสีแดง ---
 const RobotLogo = ({ className = "w-10 h-10" }) => (
   <svg className={className} viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* ฟันเฟืองสีแดงรอบนอก */}
     <path d="M482.3 221.7l-35.9-5.9c-3.9-15.6-9.9-30.4-17.7-44l21.3-29.4c6.3-8.7 5.1-20.9-2.9-28.2l-32.9-30c-7.9-7.2-20.2-7.2-28 0l-22.5 19.3c-14.1-8.9-29.6-15.6-46.1-19.8l-7-35.7C312 36.5 302 28 290.3 28h-44.5c-11.7 0-21.7 8.5-23.4 20l-7 35.7c-16.5 4.2-32 10.9-46.1 19.8L146.8 84.2c-7.8-7.2-20.1-7.2-28 0l-32.9 30c-8 7.3-9.2 19.5-2.9 28.2l21.3 29.4c-7.8 13.6-13.8 28.4-17.7 44l-35.9 5.9C39 223.4 30.5 233.1 30.5 244.7v44.5c0 11.6 8.5 21.3 20.2 23l35.9 5.9c3.9 15.6 9.9 30.4 17.7 44l-21.3 29.4c-6.3 8.7-5.1 20.9 2.9 28.2l32.9 30c7.9 7.2 20.2 7.2 28 0l22.5-19.3c14.1 8.9 29.6 15.6 46.1 19.8l7 35.7c1.7 11.5 11.7 20 23.4 20h44.5c11.7 0 21.7-8.5 23.4-20l7-35.7c16.5-4.2 32-10.9 46.1-19.8l22.5 19.3c7.8 7.2 20.1 7.2 28 0l32.9-30c8-7.3 9.2-19.5 2.9-28.2l-21.3-29.4c7.8-13.6 13.8-28.4 17.7-44l35.9-5.9c11.7-1.7 20.2-11.4 20.2-23v-44.5c0-11.6-8.5-21.3-20.2-23z" fill="#ff4d4d" stroke="#000" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round"/>
-    {/* วงกลมสีขาวตรงกลาง */}
     <circle cx="256" cy="256" r="135" fill="#fff" stroke="#000" strokeWidth="16"/>
-    {/* หัวหุ่นยนต์สี่เหลี่ยม */}
     <rect x="180" y="210" width="152" height="100" rx="25" fill="#e0e0e0" stroke="#000" strokeWidth="16"/>
-    {/* ตาหุ่นยนต์สองข้าง */}
     <circle cx="225" cy="260" r="14" fill="#000"/>
     <circle cx="287" cy="260" r="14" fill="#000"/>
-    {/* หูหุ่นยนต์ด้านซ้ายและขวา */}
     <rect x="148" y="235" width="32" height="50" rx="16" fill="#b0b0b0" stroke="#000" strokeWidth="16"/>
     <rect x="332" y="235" width="32" height="50" rx="16" fill="#b0b0b0" stroke="#000" strokeWidth="16"/>
-    {/* เสาอากาศด้านบน */}
     <line x1="256" y1="210" x2="256" y2="175" stroke="#000" strokeWidth="16" strokeLinecap="round"/>
     <circle cx="256" cy="160" r="18" fill="#ff4d4d" stroke="#000" strokeWidth="12"/>
-    {/* ปากหุ่นยนต์ด้านล่าง */}
     <line x1="230" y1="290" x2="282" y2="290" stroke="#000" strokeWidth="8" strokeLinecap="round"/>
   </svg>
 );
@@ -274,7 +267,6 @@ const LoginPage = ({ onLogin }) => {
       const token = response.data.access_token;
       if (token) {
         localStorage.setItem('token', token);
-        localStorage.setItem('student_id', username);
         onLogin();
       }
     } catch (error) {
@@ -287,7 +279,6 @@ const LoginPage = ({ onLogin }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4">
       <div className="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border border-gray-50 text-center">
-        {/* เปลี่ยนไอคอนหน้า Login ให้ล้อไปกับธีมโลโก้หุ่นยนต์ */}
         <div className="w-24 h-24 flex items-center justify-center mx-auto mb-6">
           <RobotLogo className="w-20 h-20" />
         </div>
@@ -316,7 +307,32 @@ const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  const currentStudentId = localStorage.getItem('student_id') || '65100521';
+  // 🛠️ [เพิ่มสเตทสำหรับเก็บข้อมูล นศ จริงจาก API]
+  const [studentData, setStudentData] = useState(null);
+  const [fetchingUser, setFetchingUser] = useState(false);
+
+  // 🛠️ [เพิ่ม useEffect]: ดึงข้อมูลนักศึกษาจาก /student/me เมื่อล็อกอินแล้ว
+  useEffect(() => {
+    if (isLoggedIn) {
+      const fetchStudentProfile = async () => {
+        try {
+          setFetchingUser(true);
+          const response = await api.get('/student/me');
+          setStudentData(response.data);
+        } catch (error) {
+          console.error("Error fetching student profile:", error);
+          // หาก token หมดอายุหรือไม่ถูกต้อง ให้เคลียร์สเตทล็อกเอาต์
+          if (error.response?.status === 401) {
+            localStorage.clear();
+            setIsLoggedIn(false);
+          }
+        } finally {
+          setFetchingUser(false);
+        }
+      };
+      fetchStudentProfile();
+    }
+  }, [isLoggedIn]);
 
   if (!isLoggedIn) return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
 
@@ -324,12 +340,9 @@ const StudentDashboard = () => {
     <div className="flex h-screen bg-[#f1f5f9] font-['Sarabun'] antialiased overflow-hidden">
       {/* Sidebar เมนูด้านซ้าย */}
       <aside className={`fixed md:relative inset-y-0 left-0 z-40 bg-[#800000] text-white transition-all duration-300 flex flex-col ${isSidebarOpen ? 'w-72 translate-x-0' : 'w-72 -translate-x-full md:translate-x-0 md:w-24'}`}>
-        
-        {/* ส่วนหัว Sidebar: 🛠️ เปลี่ยนจากข้อความ CO-OP เป็นโลโก้หุ่นยนต์ฟันเฟืองสีแดงตามรูปภาพ */}
         <div className="p-6 flex items-center justify-center border-b border-white/10 relative h-24">
           <div className="flex items-center gap-3">
             <RobotLogo className="w-12 h-12 drop-shadow-md" />
-            {/* แสดงชื่อระบบถ้ายืดแถบเมนูออก */}
             {(isSidebarOpen || window.innerWidth < 768) && (
               <span className="font-black text-xl uppercase tracking-tighter text-white animate-in fade-in duration-300">
                 CO-OP SYSTEM
@@ -343,7 +356,6 @@ const StudentDashboard = () => {
           )}
         </div>
 
-        {/* รายการเมนูนำทาง */}
         <nav className="flex-1 px-4 mt-8 space-y-2">
           {[
             { id: 'overview', name: 'หน้าหลัก', icon: <BarChart3 size={20}/> },
@@ -357,8 +369,7 @@ const StudentDashboard = () => {
           ))}
         </nav>
 
-        {/* ปุ่มออกจากระบบ */}
-        <button onClick={() => { localStorage.clear(); setIsLoggedIn(false); }} className="p-8 flex items-center text-red-200 hover:text-white transition-colors border-t border-white/5">
+        <button onClick={() => { localStorage.clear(); setIsLoggedIn(false); setStudentData(null); }} className="p-8 flex items-center text-red-200 hover:text-white transition-colors border-t border-white/5">
           <LogOut size={20} />
           {isSidebarOpen && <span className="ml-4 font-black text-xs uppercase">LOGOUT</span>}
         </button>
@@ -377,10 +388,12 @@ const StudentDashboard = () => {
             <h2 className="font-black text-gray-800 uppercase tracking-wide">{activeTab === 'overview' ? 'Dashboard' : activeTab}</h2>
           </div>
           
-          {/* ข้อมูลโปรไฟล์และสถานะ Online ไฟเขียวกระพริบ */}
+          {/* ข้อมูลโปรไฟล์และสถานะ Online */}
           <div className="flex items-center gap-3 bg-gray-50 pl-4 pr-3 py-1.5 rounded-2xl border border-gray-100">
             <div className="text-right hidden sm:block">
-              <p className="text-xs font-black text-gray-700">ID: {currentStudentId}</p>
+              <p className="text-xs font-black text-gray-700">
+                {fetchingUser ? 'กำลังโหลด...' : `ID: ${studentData?.student_id || studentData?.username || '-'}`}
+              </p>
               <div className="flex items-center justify-end gap-1.5 mt-0.5">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 <span className="text-[10px] font-bold text-green-600 uppercase">ออนไลน์</span>
@@ -401,28 +414,35 @@ const StudentDashboard = () => {
                 {/* 1. ส่วนต้อนรับและข้อมูลส่วนตัวนักศึกษา */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* แบนเนอร์แดงต้อนรับ */}
-                  <div className="lg:col-span-2 bg-gradient-to-br from-[#800000] to-red-955 p-8 md:p-10 rounded-[35px] text-white shadow-xl relative overflow-hidden flex flex-col justify-center">
-                    <h3 className="text-2xl md:text-3xl font-black mb-2">สวัสดีนักศึกษาใหม่!</h3>
+                  <div className="lg:col-span-2 bg-gradient-to-br from-[#800000] to-red-950 p-8 md:p-10 rounded-[35px] text-white shadow-xl relative overflow-hidden flex flex-col justify-center">
+                    <h3 className="text-2xl md:text-3xl font-black mb-2">
+                      {fetchingUser ? 'สวัสดีนักศึกษา' : `สวัสดีคุณ ${studentData?.name || studentData?.full_name || 'นักศึกษา'}!`}
+                    </h3>
                     <p className="opacity-80 text-xs md:text-sm font-medium max-w-sm leading-relaxed">ยินดีต้อนรับเข้าสู่ระบบจัดการสหกิจศึกษา ตรวจสอบสถานะคำร้องและข้อมูลบริษัทชั้นนำได้ทันที</p>
                     <Factory className="absolute -right-6 -bottom-10 w-48 h-48 text-white/5 rotate-12 pointer-events-none" />
                   </div>
 
-                  {/* ข้อมูลส่วนตัวของนักศึกษา */}
+                  {/* ข้อมูลส่วนตัวของนักศึกษา (ดึงข้อมูลจริงมาผูกแล้ว) */}
                   <div className="bg-white p-6 rounded-[35px] shadow-sm border border-gray-100 flex flex-col justify-between">
                     <div>
                       <span className="text-[10px] bg-red-50 text-[#800000] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">ข้อมูลส่วนตัวนักศึกษา</span>
-                      <div className="flex items-center gap-3 mt-4">
-                        <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-500"><GraduationCap size={24} /></div>
-                        <div>
-                          <p className="text-sm font-black text-gray-800">สมชาย ยอดขยัน</p>
-                          <p className="text-xs text-gray-400 font-bold">รหัส: {currentStudentId}</p>
+                      
+                      {fetchingUser ? (
+                        <div className="py-6 text-center text-xs text-gray-400 font-bold">กำลังดึงข้อมูลโปรไฟล์จาก API...</div>
+                      ) : (
+                        <div className="flex items-center gap-3 mt-4">
+                          <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-500"><GraduationCap size={24} /></div>
+                          <div>
+                            <p className="text-sm font-black text-gray-800">{studentData?.name || studentData?.full_name || 'ไม่พบข้อมูลชื่อ'}</p>
+                            <p className="text-xs text-gray-400 font-bold">รหัส: {studentData?.student_id || studentData?.username || '-'}</p>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                     <div className="border-t border-gray-50 pt-3 mt-4 space-y-1.5 text-xs text-gray-500 font-bold">
-                      <p>คณะ: <span className="text-gray-700 font-black">วิทยาศาสตร์และเทคโนโลยี</span></p>
-                      <p>สาขา: <span className="text-gray-700 font-black">วิทยาการคอมพิวเตอร์</span></p>
-                      <p>ชั้นปี: <span className="text-gray-700 font-black">ปีที่ 4 (ภาคปกติ)</span></p>
+                      <p>คณะ: <span className="text-gray-700 font-black">{studentData?.faculty || 'วิทยาศาสตร์และเทคโนโลยี'}</span></p>
+                      <p>สาขา: <span className="text-gray-700 font-black">{studentData?.major || studentData?.department || 'วิทยาการคอมพิวเตอร์'}</span></p>
+                      <p>สถานะสิทธิ์: <span className="text-gray-700 font-black uppercase">{studentData?.role || 'student'}</span></p>
                     </div>
                   </div>
                 </div>
@@ -528,7 +548,6 @@ const StudentDashboard = () => {
         </section>
       </main>
       
-      {/* ฝังฟอนต์ Sarabun สไตล์โมเดิร์น */}
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap');
         body { font-family: 'Sarabun', sans-serif; }
