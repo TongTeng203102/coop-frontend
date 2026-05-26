@@ -307,21 +307,22 @@ const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  // 🛠️ [เพิ่มสเตทสำหรับเก็บข้อมูล นศ จริงจาก API]
   const [studentData, setStudentData] = useState(null);
   const [fetchingUser, setFetchingUser] = useState(false);
 
-  // 🛠️ [เพิ่ม useEffect]: ดึงข้อมูลนักศึกษาจาก /student/me เมื่อล็อกอินแล้ว
+  // ดึงข้อมูลนักศึกษาจาก /student/me (แก้ไขเพื่อให้รองรับโครงสร้างซ้อนก้อน .user)
   useEffect(() => {
     if (isLoggedIn) {
       const fetchStudentProfile = async () => {
         try {
           setFetchingUser(true);
           const response = await api.get('/student/me');
-          setStudentData(response.data);
+          
+          // 🛠️ ตรวจสอบโครงสร้าง: ดึงจาก response.data.user หรือ response.data โดยตรง
+          const actualData = response.data?.user ? response.data.user : response.data;
+          setStudentData(actualData);
         } catch (error) {
           console.error("Error fetching student profile:", error);
-          // หาก token หมดอายุหรือไม่ถูกต้อง ให้เคลียร์สเตทล็อกเอาต์
           if (error.response?.status === 401) {
             localStorage.clear();
             setIsLoggedIn(false);
@@ -333,6 +334,12 @@ const StudentDashboard = () => {
       fetchStudentProfile();
     }
   }, [isLoggedIn]);
+
+  // ดึงค่าไอดีนักศึกษามาแสดงผลบน Header
+  const displayStudentId = studentData?.student_id || studentData?.username || studentData?.id || '-';
+  
+  // ดึงชื่อนักศึกษามาแสดงผล
+  const displayStudentName = studentData?.student_name || studentData?.name || studentData?.full_name || studentData?.display_name || 'ไม่พบข้อมูลชื่อ';
 
   if (!isLoggedIn) return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
 
@@ -392,7 +399,7 @@ const StudentDashboard = () => {
           <div className="flex items-center gap-3 bg-gray-50 pl-4 pr-3 py-1.5 rounded-2xl border border-gray-100">
             <div className="text-right hidden sm:block">
               <p className="text-xs font-black text-gray-700">
-                {fetchingUser ? 'กำลังโหลด...' : `ID: ${studentData?.student_id || studentData?.username || '-'}`}
+                {fetchingUser ? 'กำลังโหลด...' : `ID: ${displayStudentId}`}
               </p>
               <div className="flex items-center justify-end gap-1.5 mt-0.5">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
@@ -405,7 +412,7 @@ const StudentDashboard = () => {
           </div>
         </header>
 
-        {/* สลับหน้าการทำงานตาม Tab */}
+        {/* เนื้อหาภายในส่วนบอร์ด */}
         <section className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50/50">
           <div className="max-w-5xl mx-auto space-y-6">
             
@@ -416,33 +423,33 @@ const StudentDashboard = () => {
                   {/* แบนเนอร์แดงต้อนรับ */}
                   <div className="lg:col-span-2 bg-gradient-to-br from-[#800000] to-red-950 p-8 md:p-10 rounded-[35px] text-white shadow-xl relative overflow-hidden flex flex-col justify-center">
                     <h3 className="text-2xl md:text-3xl font-black mb-2">
-                      {fetchingUser ? 'สวัสดีนักศึกษา' : `สวัสดีคุณ ${studentData?.name || studentData?.full_name || 'นักศึกษา'}!`}
+                      {fetchingUser ? 'สวัสดีนักศึกษา' : `สวัสดีคุณ ${displayStudentName}!`}
                     </h3>
                     <p className="opacity-80 text-xs md:text-sm font-medium max-w-sm leading-relaxed">ยินดีต้อนรับเข้าสู่ระบบจัดการสหกิจศึกษา ตรวจสอบสถานะคำร้องและข้อมูลบริษัทชั้นนำได้ทันที</p>
                     <Factory className="absolute -right-6 -bottom-10 w-48 h-48 text-white/5 rotate-12 pointer-events-none" />
                   </div>
 
-                  {/* ข้อมูลส่วนตัวของนักศึกษา (ดึงข้อมูลจริงมาผูกแล้ว) */}
+                  {/* ข้อมูลส่วนตัวของนักศึกษา */}
                   <div className="bg-white p-6 rounded-[35px] shadow-sm border border-gray-100 flex flex-col justify-between">
                     <div>
                       <span className="text-[10px] bg-red-50 text-[#800000] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">ข้อมูลส่วนตัวนักศึกษา</span>
                       
                       {fetchingUser ? (
-                        <div className="py-6 text-center text-xs text-gray-400 font-bold">กำลังดึงข้อมูลโปรไฟล์จาก API...</div>
+                        <div className="py-6 text-center text-xs text-gray-400 font-bold animate-pulse">กำลังซิงค์ข้อมูลกับระบบ...</div>
                       ) : (
                         <div className="flex items-center gap-3 mt-4">
                           <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-500"><GraduationCap size={24} /></div>
                           <div>
-                            <p className="text-sm font-black text-gray-800">{studentData?.name || studentData?.full_name || 'ไม่พบข้อมูลชื่อ'}</p>
-                            <p className="text-xs text-gray-400 font-bold">รหัส: {studentData?.student_id || studentData?.username || '-'}</p>
+                            <p className="text-sm font-black text-gray-800">{displayStudentName}</p>
+                            <p className="text-xs text-gray-400 font-bold">รหัส: {displayStudentId}</p>
                           </div>
                         </div>
                       )}
                     </div>
                     <div className="border-t border-gray-50 pt-3 mt-4 space-y-1.5 text-xs text-gray-500 font-bold">
-                      <p>คณะ: <span className="text-gray-700 font-black">{studentData?.faculty || 'วิทยาศาสตร์และเทคโนโลยี'}</span></p>
-                      <p>สาขา: <span className="text-gray-700 font-black">{studentData?.major || studentData?.department || 'วิทยาการคอมพิวเตอร์'}</span></p>
-                      <p>สถานะสิทธิ์: <span className="text-gray-700 font-black uppercase">{studentData?.role || 'student'}</span></p>
+                      <p>คณะ: <span className="text-gray-700 font-black">{studentData?.faculty_name || studentData?.faculty || 'วิทยาศาสตร์และเทคโนโลยี'}</span></p>
+                      <p>สาขา: <span className="text-gray-700 font-black">{studentData?.field_of_study || studentData?.major_name || studentData?.major || studentData?.department || 'วิทยาการคอมพิวเตอร์'}</span></p>
+                      <p>สถานะสิทธิ์: <span className="text-gray-700 font-black uppercase text-red-600">{studentData?.role || 'STUDENT'}</span></p>
                     </div>
                   </div>
                 </div>
