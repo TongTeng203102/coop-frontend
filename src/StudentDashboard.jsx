@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
-  BarChart3, LogOut, Menu, X, Lock, 
-  Factory, FileSearch, AlertCircle, 
+  BarChart3, LogOut, Menu, X, 
+  Factory, FileSearch, 
   ChevronRight, User, MapPin, Phone, 
   Building2, Info, Filter,
   CheckCircle2, Clock, Calendar, GraduationCap
@@ -11,6 +11,7 @@ import {
 // --- Configuration ---
 const API_BASE_URL = "https://coop-backend-02.vercel.app";
 
+// สร้างตัวแปรสำหรับยิง API ทั่วไป (เช่น ดึงข้อมูลบริษัท)
 const api = axios.create({ baseURL: API_BASE_URL });
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
@@ -310,17 +311,26 @@ const StudentDashboard = () => {
   const [studentData, setStudentData] = useState(null);
   const [fetchingUser, setFetchingUser] = useState(false);
 
-  // ดึงข้อมูลนักศึกษาจาก /student/me
+  // 🛠️ จุดแก้ไข: ดึงข้อมูลนักศึกษาด้วย URL ตัวเต็มไม่อ้อมค้อม
   useEffect(() => {
     if (isLoggedIn) {
       const fetchStudentProfile = async () => {
         try {
           setFetchingUser(true);
-          const response = await api.get('/student/me');
+          
+          // ดึง Token มาแปะ Header สำหรับสิทธิ์การเข้าถึงข้อมูลตัวเอง
+          const token = localStorage.getItem('token');
+          
+          // ยิงเข้าหาลิงก์ตรงๆ ตัวเต็มตามที่คุณต้องการ
+          const response = await axios.get('https://coop-backend-02.vercel.app/student/me', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
           
           console.log("Raw API Response:", response.data);
 
-          // 🛠️ ตรวจสอบอย่างละเอียด: ถ้า API ส่งกลับมาเป็น Array ให้เอาตัวแรก [0] มาใช้
+          // ตรวจสอบชนิดข้อมูลและเซ็ตลง State
           if (Array.isArray(response.data)) {
             setStudentData(response.data[0]);
           } else if (response.data?.user) {
@@ -346,7 +356,7 @@ const StudentDashboard = () => {
   // --- 🛠️ แมตช์ตัวแปรตรงกับโครงสร้าง JSON จริง ---
   const studentId = studentData?.student_id || '-';
   
-  // นำ first_name มารวมกับ last_name (เช่น Kasidet Masang)
+  // นำ first_name มารวมกับ last_name (Kasidet Masang)
   const studentFullName = studentData?.first_name && studentData?.last_name 
     ? `${studentData.first_name} ${studentData.last_name}`
     : 'กำลังโหลดข้อมูลชื่อ...';
