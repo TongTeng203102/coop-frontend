@@ -318,9 +318,17 @@ const StudentDashboard = () => {
           setFetchingUser(true);
           const response = await api.get('/student/me');
           
-          // ตรวจสอบระดับชั้นการห่อหุ้มออบเจกต์ (รองรับทั้ง response.data.user หรือ response.data โดยตรง)
-          const actualData = response.data?.user ? response.data.user : response.data;
-          setStudentData(actualData);
+          console.log("Raw API Response:", response.data);
+
+          // 🛠️ ตรวจสอบอย่างละเอียด: ถ้า API ส่งกลับมาเป็น Array ให้เอาตัวแรก [0] มาใช้
+          if (Array.isArray(response.data)) {
+            setStudentData(response.data[0]);
+          } else if (response.data?.user) {
+            setStudentData(Array.isArray(response.data.user) ? response.data.user[0] : response.data.user);
+          } else {
+            setStudentData(response.data);
+          }
+
         } catch (error) {
           console.error("Error fetching student profile:", error);
           if (error.response?.status === 401) {
@@ -335,13 +343,13 @@ const StudentDashboard = () => {
     }
   }, [isLoggedIn]);
 
-  // --- 🛠️ แมตช์ตัวแปรให้ตรงกับ JSON โครงสร้างจริงแบบ 100% ---
+  // --- 🛠️ แมตช์ตัวแปรตรงกับโครงสร้าง JSON จริง ---
   const studentId = studentData?.student_id || '-';
   
-  // นำ first_name มารวมกับ last_name (เช่น Kasidet Masang) ถ้าไม่มีให้แสดงคีย์อื่นๆ เผื่อไว้
+  // นำ first_name มารวมกับ last_name (เช่น Kasidet Masang)
   const studentFullName = studentData?.first_name && studentData?.last_name 
     ? `${studentData.first_name} ${studentData.last_name}`
-    : (studentData?.student_name || studentData?.name || 'กำลังโหลดชื่อ...');
+    : 'กำลังโหลดข้อมูลชื่อ...';
 
   const studentFaculty = studentData?.faculty || 'ไม่ระบุคณะ';
   const studentMajor = studentData?.major || 'ไม่ระบุสาขา';
