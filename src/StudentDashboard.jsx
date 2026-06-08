@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { 
-  BarChart3, LogOut, Menu, X, 
-  Factory, FileSearch, 
-  ChevronRight, User, MapPin, Phone, 
+import {
+  BarChart3, LogOut, Menu, X,
+  Factory, FileSearch,
+  ChevronRight, User, MapPin, Phone,
   Building2, Info, Filter,
   CheckCircle2, Clock, Calendar, GraduationCap,
   ShieldAlert, ClipboardCheck, Users
@@ -82,10 +82,10 @@ const CompanyManagement = () => {
         <h3 className="text-[#800000] font-black flex items-center gap-2 text-lg">
           <Factory size={24}/> รายชื่อสถานประกอบการ
         </h3>
-        
+       
         <div className="flex items-center gap-2 w-full md:w-auto justify-end">
           <div className="relative flex-1 md:flex-none">
-            <input 
+            <input
               type="text"
               placeholder="ค้นหาบริษัท (เช่น CP)..."
               value={searchTerm}
@@ -93,9 +93,9 @@ const CompanyManagement = () => {
               className="w-full md:w-64 px-4 py-2 text-sm bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#800000] font-bold"
             />
           </div>
-          
+         
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowFilterMenu(!showFilterMenu)}
               className={`p-2.5 rounded-xl border transition-all flex items-center justify-center ${showFilterMenu ? 'bg-[#800000] text-white border-[#800000]' : 'bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100'}`}
             >
@@ -146,9 +146,9 @@ const CompanyManagement = () => {
         ) : filteredCompanies.length === 0 ? (
           <div className="text-center py-10 text-gray-400 font-bold">ไม่พบข้อมูลสถานประกอบการในกลุ่มนี้</div>
         ) : (
-          filteredCompanies.map((company, index) => (
-            <div 
-              key={company.id || index} 
+          <filteredCompanies.map((company, index) => (
+            <div
+              key={company.id || index}
               onClick={() => setSelectedCompany(company)}
               className="flex items-center justify-between p-5 border border-gray-50 rounded-2xl hover:bg-red-50/50 transition-all cursor-pointer group"
             >
@@ -265,20 +265,19 @@ const LoginPage = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const payload = { 
-        username: String(username), 
+      const payload = {
+        username: String(username),
         password: String(password),
-        role: role // ส่งบทบาทไปยัง Backend หาก API ต้องการแยกแยะ
+        role: role
       };
-      
-      // เลือกยิง endpoint ตามสิทธิ์ (แก้ไขให้ตรงตามโครงสร้าง API จริงของคุณได้)
+     
       const endpoint = role === 'student' ? '/login' : '/staff/login';
       const response = await axios.post(`${API_BASE_URL}${endpoint}`, payload);
       const token = response.data.access_token;
-      
+     
       if (token) {
         localStorage.setItem('token', token);
-        localStorage.setItem('userRole', role); // เก็บสถานะบทบาทผู้ใช้งานลงไป
+        localStorage.setItem('userRole', role);
         onLogin(role);
       }
     } catch (error) {
@@ -288,7 +287,6 @@ const LoginPage = ({ onLogin }) => {
     }
   };
 
-  // จัดการ Dynamic Placeholder ตามแท็บที่เลือก
   const getUsernamePlaceholder = () => {
     if (role === 'student') return "รหัสนักศึกษา";
     if (role === 'coordinator') return "ชื่อบัญชีอาจารย์ผู้ประสานงาน";
@@ -302,25 +300,24 @@ const LoginPage = ({ onLogin }) => {
           <RobotLogo className="w-18 h-18" />
         </div>
         <h1 className="text-xl font-black text-gray-800 uppercase mb-6 tracking-tighter">เข้าสู่ระบบระบบสหกิจศึกษา</h1>
-        
-        {/* แท็บเลือกสิทธิ์ผู้ใช้งาน (Role Selection Tabs) */}
+       
         <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1.5 rounded-2xl mb-6">
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => { setRole('student'); setUsername(''); setPassword(''); }}
             className={`py-2.5 rounded-xl font-black text-xs transition-all ${role === 'student' ? 'bg-[#800000] text-white shadow-md' : 'text-gray-500 hover:text-gray-800'}`}
           >
             นักศึกษา
           </button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => { setRole('coordinator'); setUsername(''); setPassword(''); }}
             className={`py-2.5 rounded-xl font-black text-xs transition-all ${role === 'coordinator' ? 'bg-[#800000] text-white shadow-md' : 'text-gray-500 hover:text-gray-800'}`}
           >
             ผู้ประสานงาน
           </button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => { setRole('advisor'); setUsername(''); setPassword(''); }}
             className={`py-2.5 rounded-xl font-black text-xs transition-all ${role === 'advisor' ? 'bg-[#800000] text-white shadow-md' : 'text-gray-500 hover:text-gray-800'}`}
           >
@@ -331,24 +328,24 @@ const LoginPage = ({ onLogin }) => {
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           <div>
             <label className="text-xs font-black text-gray-400 block mb-1.5 pl-1">ชื่อบัญชีผู้ใช้งาน</label>
-            <input 
-              type="text" 
-              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold focus:border-[#800000] transition-all text-sm" 
-              placeholder={getUsernamePlaceholder()} 
-              value={username} 
-              onChange={(e) => setUsername(e.target.value)} 
-              required 
+            <input
+              type="text"
+              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold focus:border-[#800000] transition-all text-sm"
+              placeholder={getUsernamePlaceholder()}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
             />
           </div>
           <div>
             <label className="text-xs font-black text-gray-400 block mb-1.5 pl-1">รหัสผ่านสำหรับเข้าสู่ระบบ</label>
-            <input 
-              type="password" 
-              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold focus:border-[#800000] transition-all text-sm" 
-              placeholder="••••••••" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
+            <input
+              type="password"
+              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold focus:border-[#800000] transition-all text-sm"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
           <button type="submit" disabled={loading} className="w-full bg-[#800000] text-white py-4 mt-2 rounded-2xl font-black shadow-xl hover:bg-black transition-all text-sm tracking-wider">
@@ -360,13 +357,13 @@ const LoginPage = ({ onLogin }) => {
   );
 };
 
-// --- 3. Main Container (รองรับหลายบทบาทและล็อกเมนูไม่ให้หดจอ) ---
+// --- 3. Main Container ---
 const MainAppContainer = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || 'student');
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
+ 
   const [profileData, setProfileData] = useState(null);
   const [fetchingUser, setFetchingUser] = useState(false);
 
@@ -376,17 +373,16 @@ const MainAppContainer = () => {
         try {
           setFetchingUser(true);
           const token = localStorage.getItem('token');
-          
-          // เลือกยิง Endpoint ตามบทบาทที่ล็อกอินเข้ามา
+         
           let fetchUrl = 'https://coop-backend-02.vercel.app/student/me';
           if (userRole === 'coordinator' || userRole === 'advisor') {
-            fetchUrl = 'https://coop-backend-02.vercel.app/staff/me'; // ปรับตาม Endpoint ระบบ Staff ของคุณ
+            fetchUrl = 'https://coop-backend-02.vercel.app/staff/me';
           }
 
           const response = await axios.get(fetchUrl, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          
+         
           console.log("Raw Profile Response:", response.data);
 
           if (Array.isArray(response.data)) {
@@ -422,15 +418,13 @@ const MainAppContainer = () => {
     setIsLoggedIn(true);
   };
 
-  // Mapping ตัวแปรให้ยืดหยุ่นตามโครงสร้างข้อมูล
   const displayId = profileData?.student_id || profileData?.staff_id || profileData?.username || '-';
-  const displayFullName = profileData?.first_name && profileData?.last_name 
+  const displayFullName = profileData?.first_name && profileData?.last_name
     ? `${profileData.first_name} ${profileData.last_name}`
     : fetchingUser ? 'กำลังโหลด...' : 'อาจารย์ประจำวิชา / เจ้าหน้าที่';
 
   if (!isLoggedIn) return <LoginPage onLogin={handleLoginSuccess} />;
 
-  // กำหนดรายการเมนู Sidebar ตามบทบาทผู้เข้าใช้งาน
   const getMenuItems = () => {
     if (userRole === 'student') {
       return [
@@ -445,7 +439,7 @@ const MainAppContainer = () => {
         { id: 'manage_requests', name: 'อนุมัติคำร้องนักศึกษา', icon: <ClipboardCheck size={20}/> },
         { id: 'all_students', name: 'รายชื่อนักศึกษาทั้งหมด', icon: <Users size={20}/> }
       ];
-    } else { // advisor (อาจารย์นิเทศก์)
+    } else {
       return [
         { id: 'overview', name: 'หน้าแรก', icon: <BarChart3 size={20}/> },
         { id: 'company', name: 'ดูรายชื่อสถานประกอบการ', icon: <Factory size={20}/> },
@@ -456,10 +450,9 @@ const MainAppContainer = () => {
   };
 
   return (
-    // เพิ่ม w-full h-screen overflow-hidden ตรึงเฟรมป้องกันเมนูหดเบี้ยวและบั๊กเต็มจอฝั่งซ้าย
     <div className="flex h-screen w-full bg-[#f1f5f9] font-['Sarabun'] antialiased overflow-hidden">
-      
-      {/* Sidebar - ใส่โครงสร้าง shrink-0 ป้องกันแถบซ้ายหดตัวเมื่อเนื้อหาขวาล้นจอ */}
+     
+      {/* Sidebar */}
       <aside className={`fixed md:relative inset-y-0 left-0 z-40 bg-[#800000] text-white transition-all duration-300 flex flex-col shrink-0 ${isSidebarOpen ? 'w-72 translate-x-0' : 'w-72 -translate-x-full md:translate-x-0 md:w-24'}`}>
         <div className="p-6 flex items-center justify-center border-b border-white/10 relative h-24 shrink-0">
           <div className="flex items-center gap-3">
@@ -492,9 +485,9 @@ const MainAppContainer = () => {
         </button>
       </aside>
 
-      {/* พื้นที่เนื้อหาหลักด้านขวา - กินพื้นที่เต็มส่วนที่เหลือด้วย flex-1 */}
+      {/* ขอบเขตเนื้อหาหลักฝั่งขวา */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        
+       
         {/* Header แถบบน */}
         <header className="h-20 bg-white border-b flex items-center justify-between px-8 shrink-0">
           <div className="flex items-center gap-4">
@@ -507,8 +500,7 @@ const MainAppContainer = () => {
               {activeTab === 'overview' ? 'Dashboard' : activeTab}
             </h2>
           </div>
-          
-          {/* ข้อมูลโปรไฟล์มุมขวาบนเปลี่ยนคำตามบทบาท */}
+         
           <div className="flex items-center gap-3 bg-gray-50 pl-4 pr-3 py-1.5 rounded-2xl border border-gray-100">
             <div className="text-right hidden sm:block">
               <p className="text-xs font-black text-gray-700">
@@ -530,7 +522,7 @@ const MainAppContainer = () => {
         {/* ส่วนกระดานบอร์ดเนื้อหาหลัก */}
         <section className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50/50">
           <div className="max-w-5xl mx-auto space-y-6">
-            
+           
             {activeTab === 'overview' && (
               <>
                 {/* 1. ส่วนต้อนรับและข้อมูลส่วนตัวตามบทบาท */}
@@ -541,8 +533,8 @@ const MainAppContainer = () => {
                       สวัสดีคุณ {displayFullName}!
                     </h3>
                     <p className="opacity-80 text-xs font-medium max-w-sm leading-relaxed">
-                      {userRole === 'student' 
-                        ? 'ยินดีต้อนรับเข้าสู่ระบบจัดการสหกิจศึกษา ตรวจสอบสถานะคำร้องและข้อมูลบริษัทชั้นนำได้ทันที' 
+                      {userRole === 'student'
+                        ? 'ยินดีต้อนรับเข้าสู่ระบบจัดการสหกิจศึกษา ตรวจสอบสถานะคำร้องและข้อมูลบริษัทชั้นนำได้ทันที'
                         : 'ระบบจัดการหลังบ้านสำหรับคณาจารย์และเจ้าหน้าที่ ตรวจสอบความถูกต้องและอนุมัติสิทธิ์นักศึกษา'}
                     </p>
                     <Factory className="absolute -right-6 -bottom-10 w-48 h-48 text-white/5 rotate-12 pointer-events-none" />
@@ -554,7 +546,7 @@ const MainAppContainer = () => {
                       <span className="text-[10px] bg-red-50 text-[#800000] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">
                         บัญชีผู้ใช้งานปัจจุบัน
                       </span>
-                      
+                     
                       <div className="flex items-center gap-3 mt-4">
                         <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-500"><GraduationCap size={24} /></div>
                         <div>
@@ -563,7 +555,7 @@ const MainAppContainer = () => {
                         </div>
                       </div>
                     </div>
-                    
+                   
                     <div className="border-t border-gray-50 pt-3 mt-4 space-y-1.5 text-xs text-gray-500 font-bold">
                       {userRole === 'student' ? (
                         <>
@@ -584,10 +576,10 @@ const MainAppContainer = () => {
                 {/* 2. สรุปแดชบอร์ดตามบทบาทผู้ใช้งาน */}
                 <div className="bg-white p-6 md:p-8 rounded-[35px] shadow-sm border border-gray-100">
                   <h4 className="text-gray-800 font-black mb-6 flex items-center gap-2">
-                    <BarChart3 size={20} className="text-[#800000]"/> 
+                    <BarChart3 size={20} className="text-[#800000]"/>
                     {userRole === 'student' ? 'สรุปสถานะคำร้องส่วนตัว' : 'ภาพรวมข้อมูลคำร้องงานในระบบทั้งหมด'}
                   </h4>
-                  
+                 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="p-5 bg-emerald-50/50 border border-emerald-100 rounded-2xl flex items-center justify-between">
                       <div>
@@ -618,17 +610,23 @@ const MainAppContainer = () => {
                 {/* ไทม์ไลน์จะแสดงเฉพาะฝั่งนักศึกษา */}
                 {userRole === 'student' && (
                   <div className="bg-white p-6 md:p-8 rounded-[35px] shadow-sm border border-gray-100">
-                    <h4 className="text-gray-800 font-black mb-8 flex items-center gap-2"><Calendar size={20} className="text-[#800000]"/> ไทม์ไลน์ขั้นตอนการดำเนินงาน (Co-op Timeline)</h4>
+                    <h4 className="text-gray-800 font-black mb-8 flex items-center gap-2">
+                      <Calendar size={20} className="text-[#800000]"/> ไทม์ไลน์ขั้นตอนการดำเนินงาน (Co-op Timeline)
+                    </h4>
                     <div className="relative border-l-2 border-red-100 ml-4 md:ml-6 space-y-8 pb-4">
                       <div className="relative pl-8">
-                        <div className="absolute -left-[13px] top-0 bg-emerald-500 text-white p-1 rounded-full"><CheckCircle2 size={16} /></div>
+                        <div className="absolute -left-[13px] top-0 bg-emerald-500 text-white p-1 rounded-full">
+                          <CheckCircle2 size={16} />
+                        </div>
                         <div>
                           <span className="text-[10px] text-emerald-600 font-black bg-emerald-50 px-2 py-0.5 rounded-md">เสร็จสิ้นแล้ว</span>
                           <h5 className="text-sm font-black text-gray-800 mt-1">ยื่นใบสมัครและเลือกสถานประกอบการ</h5>
                         </div>
                       </div>
                       <div className="relative pl-8">
-                        <div className="absolute -left-[13px] top-0 bg-amber-400 text-white p-1 rounded-full"><Clock size={16} /></div>
+                        <div className="absolute -left-[13px] top-0 bg-amber-400 text-white p-1 rounded-full">
+                          <Clock size={16} />
+                        </div>
                         <div>
                           <span className="text-[10px] text-amber-600 font-black bg-amber-50 px-2 py-0.5 rounded-md">กำลังดำเนินงาน</span>
                           <h5 className="text-sm font-black text-gray-800 mt-1">อาจารย์และเจ้าหน้าที่ตรวจสอบคำร้อง</h5>
