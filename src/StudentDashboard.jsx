@@ -254,7 +254,7 @@ const CompanyManagement = () => {
   );
 };
 
-// --- 2. หน้า Login ที่ปรับปรุงให้เลือกบทบาทได้ ---
+// --- 2. หน้า Login (ปรับปรุงแก้ไขจุดบกพร่องตามสเปก FastAPI แล้ว) ---
 const LoginPage = ({ onLogin }) => {
   const [role, setRole] = useState('student'); // 'student' | 'coordinator' | 'advisor'
   const [username, setUsername] = useState('');
@@ -265,23 +265,41 @@ const LoginPage = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     try {
+      // ปรับปรุง: ส่งเฉพาะข้อมูลตาม Schema หลังบ้าน (ไม่ยัดฟิลด์ role ไปใน Body)
       const payload = {
         username: String(username),
-        password: String(password),
-        role: role
+        password: String(password)
       };
      
-      const endpoint = role === 'student' ? '/login' : '/staff/login';
+      // 💡 จุดตรวจสอบพาท (Endpoint): 
+      // ถ้าอาจารย์ขึ้นว่า 404 ให้เช็กชื่อหลังบ้านในแถบโพสต์สีเขียว แล้วแก้ไขคำในเครื่องหมายคำพูดด้านล่างนี้ครับ
+      const endpoint = role === 'student' ? '/login' : '/staff/login'; 
+      
       const response = await axios.post(`${API_BASE_URL}${endpoint}`, payload);
-      const token = response.data.access_token;
+      
+      // ปรับปรุง: ตรวจสอบและดึง Token (เผื่อกรณีหลังบ้านส่งมาเป็น Plain String หรือห่อใน Object)
+      const token = typeof response.data === 'string' ? response.data : response.data.access_token;
      
       if (token) {
         localStorage.setItem('token', token);
         localStorage.setItem('userRole', role);
         onLogin(role);
+      } else {
+        alert("ระบบได้รับข้อมูลสำเร็จ แต่ไม่พบสิทธิ์เข้าใช้งานในรูปแบบ Token");
       }
     } catch (error) {
-      alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+      // ดักจับ Error แจ้งเตือนสาเหตุที่แท้จริงแทนการสุ่มแจ้งว่ารหัสผิด
+      if (error.response) {
+        if (error.response.status === 404) {
+          alert(`หาหน้าปลายทางไม่เจอ (404 Not Found):\nพาท "${error.config.url}" ไม่มีอยู่จริงในโค้ดหลังบ้าน\nกรุณาตรวจสอบการตั้งค่าตัวแปร endpoint อีกครั้ง`);
+        } else if (error.response.status === 401 || error.response.status === 422) {
+          alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง หรือรูปแบบข้อมูลไม่ตรงเงื่อนไข");
+        } else {
+          alert(`เกิดข้อผิดพลาดจากเซิร์ฟเวอร์หลังบ้าน: รหัสสถานะ ${error.response.status}`);
+        }
+      } else {
+        alert("ไม่สามารถเชื่อมต่อระบบเครือข่ายเข้ากับเซิร์ฟเวอร์หลังบ้านได้");
+      }
     } finally {
       setLoading(false);
     }
