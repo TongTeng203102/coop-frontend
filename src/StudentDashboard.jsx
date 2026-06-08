@@ -146,7 +146,7 @@ const CompanyManagement = () => {
         ) : filteredCompanies.length === 0 ? (
           <div className="text-center py-10 text-gray-400 font-bold">ไม่พบข้อมูลสถานประกอบการในกลุ่มนี้</div>
         ) : (
-          <filteredCompanies.map((company, index) => (
+          filteredCompanies.map((company, index) => (
             <div
               key={company.id || index}
               onClick={() => setSelectedCompany(company)}
