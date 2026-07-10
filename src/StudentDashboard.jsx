@@ -6,7 +6,7 @@ import {
   ChevronRight, User, MapPin, Phone,
   Building2, Info, Filter,
   CheckCircle2, Clock, Calendar, GraduationCap,
-  ShieldAlert, ClipboardCheck, Users
+  ShieldAlert, ClipboardCheck, Users, Shield, Eye, EyeOff, Download
 } from 'lucide-react';
 
 // --- Configuration ---
@@ -82,7 +82,7 @@ const CompanyManagement = () => {
         <h3 className="text-[#800000] font-black flex items-center gap-2 text-lg">
           <Factory size={24}/> รายชื่อสถานประกอบการ
         </h3>
-       
+        
         <div className="flex items-center gap-2 w-full md:w-auto justify-end">
           <div className="relative flex-1 md:flex-none">
             <input
@@ -93,7 +93,7 @@ const CompanyManagement = () => {
               className="w-full md:w-64 px-4 py-2 text-sm bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#800000] font-bold"
             />
           </div>
-         
+          
           <div className="relative">
             <button
               onClick={() => setShowFilterMenu(!showFilterMenu)}
@@ -254,125 +254,304 @@ const CompanyManagement = () => {
   );
 };
 
-// --- 2. หน้า Login (ปรับพาทไปใช้ร่วมกันที่พาท /login แล้ว) ---
-const LoginPage = ({ onLogin }) => {
-  const [role, setRole] = useState('student'); // 'student' | 'coordinator' | 'advisor'
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+// --- 2. ส่วนของอาจารย์ผู้ประสานงานรายวิชา (Coordinator View) ---
+const CoordinatorManagement = ({ activeTab }) => {
+  const [students, setStudents] = useState([
+    { id: "ST6601", name: "สมชาย สายฟ้า", company: "CP All", status: "Wait", major: "CPE", role: "student", access: true },
+    { id: "ST6602", name: "สมหญิง มิ่งขวัญ", company: "Agoda", status: "Approved", major: "AI", role: "student", access: true },
+    { id: "AD7701", name: "ศ.ดร.สมเกียรติ รักเรียน", company: "อาจารย์นิเทศก์คอมพิวเตอร์", status: "-", major: "CPE", role: "advisor", access: true }
+  ]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const payload = {
-        username: String(username),
-        password: String(password)
-      };
-     
-      // ปรับปรุง: วิ่งเข้าหาพาทรวม /login เดียวกันทั้งหมดตามพาทสเปกที่ถูกต้อง
-      const endpoint = '/login'; 
-      
-      const response = await axios.post(`${API_BASE_URL}${endpoint}`, payload);
-      
-      // ดึง Token รองรับทั้งรูปแบบ Plain String และ Object
-      const token = typeof response.data === 'string' ? response.data : response.data.access_token;
-     
-      if (token) {
-        localStorage.setItem('token', token);
-        localStorage.setItem('userRole', role); // เก็บประเภทกลุ่มผู้ใช้ไว้แยก Dashboard
-        onLogin(role);
-      } else {
-        alert("ระบบได้รับข้อมูลสำเร็จ แต่ไม่พบสิทธิ์เข้าใช้งานในรูปแบบ Token");
-      }
-    } catch (error) {
-      if (error.response) {
-        if (error.response.status === 404) {
-          alert(`ไม่พบหน้าปลายทาง (404 Not Found):\nพาท "${error.config.url}" ไม่มีอยู่จริงในเซิร์ฟเวอร์หลังบ้าน`);
-        } else if (error.response.status === 401 || error.response.status === 422) {
-          alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง หรือโครงสร้างข้อมูลไม่สมบูรณ์");
-        } else {
-          alert(`เกิดข้อผิดพลาดจากเซิร์ฟเวอร์: รหัสสถานะ ${error.response.status}`);
-        }
-      } else {
-        alert("ไม่สามารถเชื่อมต่อเครือข่ายเข้ากับเซิร์ฟเวอร์หลังบ้านได้");
-      }
-    } finally {
-      setLoading(false);
-    }
+  const [events, setEvents] = useState([
+    { id: 1, title: "ส่งใบสมัครเลือกสถานประกอบการ", date: "2569-07-30", type: "Calendar" },
+    { id: 2, title: "วันส่งรายงานความก้าวหน้าครั้งที่ 1", date: "2569-08-15", type: "Report" },
+    { id: 3, title: "ช่วงออกตรวจนิเทศงานรอบที่ 1", date: "2569-09-01", type: "Supervise" }
+  ]);
+
+  const handleStatusChange = (id, newStatus) => {
+    setStudents(students.map(st => st.id === id ? { ...st, status: newStatus } : st));
   };
 
-  const getUsernamePlaceholder = () => {
-    if (role === 'student') return "รหัสนักศึกษา";
-    if (role === 'coordinator') return "ชื่อบัญชีอาจารย์ผู้ประสานงาน";
-    return "ชื่อบัญชีอาจารย์นิเทศก์";
+  const toggleAccess = (id) => {
+    setStudents(students.map(st => st.id === id ? { ...st, access: !st.access } : st));
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4">
-      <div className="bg-white p-8 md:p-10 rounded-[40px] shadow-2xl w-full max-w-lg border border-gray-50 text-center">
-        <div className="w-20 h-20 flex items-center justify-center mx-auto mb-4">
-          <RobotLogo className="w-18 h-18" />
-        </div>
-        <h1 className="text-xl font-black text-gray-800 uppercase mb-6 tracking-tighter">เข้าสู่ระบบระบบสหกิจศึกษา</h1>
-       
-        <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1.5 rounded-2xl mb-6">
-          <button
-            type="button"
-            onClick={() => { setRole('student'); setUsername(''); setPassword(''); }}
-            className={`py-2.5 rounded-xl font-black text-xs transition-all ${role === 'student' ? 'bg-[#800000] text-white shadow-md' : 'text-gray-500 hover:text-gray-800'}`}
-          >
-            นักศึกษา
-          </button>
-          <button
-            type="button"
-            onClick={() => { setRole('coordinator'); setUsername(''); setPassword(''); }}
-            className={`py-2.5 rounded-xl font-black text-xs transition-all ${role === 'coordinator' ? 'bg-[#800000] text-white shadow-md' : 'text-gray-500 hover:text-gray-800'}`}
-          >
-            ผู้ประสานงาน
-          </button>
-          <button
-            type="button"
-            onClick={() => { setRole('advisor'); setUsername(''); setPassword(''); }}
-            className={`py-2.5 rounded-xl font-black text-xs transition-all ${role === 'advisor' ? 'bg-[#800000] text-white shadow-md' : 'text-gray-500 hover:text-gray-800'}`}
-          >
-            อาจารย์นิเทศก์
-          </button>
+  const handleRoleChange = (id, newRole) => {
+    setStudents(students.map(st => st.id === id ? { ...st, role: newRole } : st));
+  };
+
+  if (activeTab === 'manage_requests') {
+    return (
+      <div className="space-y-6">
+        {/* สถิติรายงานภาพรวมคำร้อง */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-5 rounded-3xl border border-emerald-100 flex items-center justify-between shadow-sm">
+            <div>
+              <p className="text-xs font-black text-emerald-600">สถิติ: อนุมัติผ่านแล้ว</p>
+              <h4 className="text-2xl font-black text-emerald-700 mt-1">
+                {students.filter(s => s.status === 'Approved').length} <span className="text-xs font-bold text-gray-400">บริษัท</span>
+              </h4>
+            </div>
+            <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center font-black">OK</div>
+          </div>
+          <div className="bg-white p-5 rounded-3xl border border-amber-100 flex items-center justify-between shadow-sm">
+            <div>
+              <p className="text-xs font-black text-amber-600">สถิติ: รอการตรวจสอบ</p>
+              <h4 className="text-2xl font-black text-amber-700 mt-1">
+                {students.filter(s => s.status === 'Wait').length} <span className="text-xs font-bold text-gray-400">รายการ</span>
+              </h4>
+            </div>
+            <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center font-black">WAIT</div>
+          </div>
+          <div className="bg-white p-5 rounded-3xl border border-red-100 flex items-center justify-between shadow-sm">
+            <div>
+              <p className="text-xs font-black text-red-600">สถิติ: ปฏิเสธ/ไม่ผ่าน</p>
+              <h4 className="text-2xl font-black text-red-700 mt-1">
+                {students.filter(s => s.status === 'Rejected').length} <span className="text-xs font-bold text-gray-400">รายการ</span>
+              </h4>
+            </div>
+            <div className="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center font-black">REJ</div>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-left">
-          <div>
-            <label className="text-xs font-black text-gray-400 block mb-1.5 pl-1">ชื่อบัญชีผู้ใช้งาน</label>
-            <input
-              type="text"
-              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold focus:border-[#800000] transition-all text-sm"
-              placeholder={getUsernamePlaceholder()}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
+        {/* ตารางคำร้องเลือกสถานประกอบการ */}
+        <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+          <h3 className="text-[#800000] font-black flex items-center gap-2 text-lg mb-6">
+            <ClipboardCheck size={24}/> จัดการและอนุมัติคำร้องเลือกสถานประกอบการ
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-gray-100 text-xs font-black text-gray-400 uppercase tracking-wider">
+                  <th className="pb-3">รหัสนักศึกษา</th>
+                  <th className="pb-3">ชื่อ-นามสกุล</th>
+                  <th className="pb-3">สาขา</th>
+                  <th className="pb-3">บริษัทที่ยื่นร้องขอ</th>
+                  <th className="pb-3 text-center">สถานะ</th>
+                  <th className="pb-3 text-right">การจัดการจัดการ</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm font-bold text-gray-700 divide-y divide-gray-50">
+                {students.filter(s => s.status !== '-').map(st => (
+                  <tr key={st.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="py-4 font-black text-gray-500">{st.id}</td>
+                    <td className="py-4 text-gray-800">{st.name}</td>
+                    <td className="py-4"><span className="bg-gray-100 px-2 py-0.5 rounded text-xs">{st.major}</span></td>
+                    <td className="py-4 font-black text-[#800000]">{st.company}</td>
+                    <td className="py-4 text-center">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-black ${
+                        st.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                        st.status === 'Rejected' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-amber-50 text-amber-600 border border-amber-100'
+                      }`}>
+                        {st.status === 'Approved' ? 'อนุมัติเรียบร้อย' : st.status === 'Rejected' ? 'ปฏิเสธคำร้อง' : 'รอตรวจสอบ'}
+                      </span>
+                    </td>
+                    <td className="py-4 text-right space-x-2">
+                      <button onClick={() => handleStatusChange(st.id, 'Approved')} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition-all shadow-sm">อนุมัติ</button>
+                      <button onClick={() => handleStatusChange(st.id, 'Rejected')} className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black transition-all shadow-sm">ปฏิเสธ</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <div>
-            <label className="text-xs font-black text-gray-400 block mb-1.5 pl-1">รหัสผ่านสำหรับเข้าสู่ระบบ</label>
-            <input
-              type="password"
-              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold focus:border-[#800000] transition-all text-sm"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" disabled={loading} className="w-full bg-[#800000] text-white py-4 mt-2 rounded-2xl font-black shadow-xl hover:bg-black transition-all text-sm tracking-wider">
-            {loading ? 'กำลังเข้าสู่ระบบ...' : `เข้าสู่ระบบในฐานะ${role === 'student' ? 'นักศึกษา' : role === 'coordinator' ? 'ผู้ประสานงาน' : 'อาจารย์นิเทศก์'}`}
-          </button>
-        </form>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (activeTab === 'all_students') {
+    return (
+      <div className="space-y-6">
+        {/* จัดการข้อมูลพื้นฐาน และ สิทธิ์ผู้ใช้ */}
+        <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+          <div className="mb-6">
+            <h3 className="text-[#800000] font-black flex items-center gap-2 text-lg">
+              <Users size={24}/> จัดการฐานข้อมูลพื้นฐาน และ บทบาทสิทธิ์ผู้ใช้งาน (User Roles)
+            </h3>
+            <p className="text-xs text-gray-400 font-bold mt-1">สามารถกำหนดแก้ไขบทบาท หรือ เปิด-ปิดการเข้าถึงระบบแบบ Real-time ของบุคคลในวิทยาลัย</p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-gray-100 text-xs font-black text-gray-400 uppercase">
+                  <th className="pb-3">รหัสประจำตัว</th>
+                  <th className="pb-3">ชื่อ-นามสกุล</th>
+                  <th className="pb-3">บทบาทระบบ</th>
+                  <th className="pb-3 text-center">สิทธิ์การเข้าถึงฟังก์ชัน</th>
+                  <th className="pb-3 text-right">สถานะระบบ</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm font-bold text-gray-700 divide-y divide-gray-50">
+                {students.map(user => (
+                  <tr key={user.id} className="hover:bg-gray-50/50">
+                    <td className="py-4 font-mono text-gray-400 text-xs">{user.id}</td>
+                    <td className="py-4">{user.name}</td>
+                    <td className="py-4">
+                      <select 
+                        value={user.role} 
+                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                        className="bg-gray-50 border border-gray-100 text-xs font-black rounded-xl p-2 outline-none focus:border-[#800000]"
+                      >
+                        <option value="student">นักศึกษา</option>
+                        <option value="advisor">อาจารย์นิเทศก์</option>
+                        <option value="coordinator">ผู้ประสานงาน</option>
+                      </select>
+                    </td>
+                    <td className="py-4 text-center">
+                      <button 
+                        onClick={() => toggleAccess(user.id)}
+                        className={`inline-flex items-center gap-1 text-xs font-black px-3 py-1 rounded-full border ${
+                          user.access ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-gray-50 text-gray-400 border-gray-200'
+                        }`}
+                      >
+                        {user.access ? <Eye size={12} /> : <EyeOff size={12} />}
+                        {user.access ? 'เปิดการเข้าถึงปกติ' : 'ปิดการเข้าถึงอยู่'}
+                      </button>
+                    </td>
+                    <td className="py-4 text-right">
+                      <span className={`w-2.5 h-2.5 inline-block rounded-full ${user.access ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* จัดการปฏิทินและกำหนดการ */}
+        <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <h4 className="text-gray-800 font-black flex items-center gap-2 text-base">
+              <Calendar size={20} className="text-[#800000]" /> ปฏิทินกำหนดการกิจกรรม และวันส่งรายงานเอกสารกลาง
+            </h4>
+            <button onClick={() => alert("ระบบฟอร์มเพิ่มปฏิทินกลาง")} className="px-3 py-1.5 bg-[#800000] text-white font-black text-xs rounded-xl hover:bg-black transition-colors">
+              + เพิ่มกำหนดการใหม่
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {events.map(ev => (
+              <div key={ev.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col justify-between gap-4">
+                <div>
+                  <span className="text-[9px] bg-red-50 text-[#800000] px-2 py-0.5 rounded font-black uppercase tracking-wider">{ev.type}</span>
+                  <p className="text-sm font-black text-gray-800 mt-2">{ev.title}</p>
+                </div>
+                <div className="text-xs font-bold text-gray-400 border-t border-gray-200/60 pt-2 flex justify-between items-center">
+                  <span>วันกำหนดการ:</span>
+                  <span className="text-gray-800 font-black">{ev.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
 };
 
-// --- 3. Main Container ---
+// --- 3. ส่วนของอาจารย์นิเทศก์ (Advisor View) ---
+const AdvisorManagement = ({ activeTab }) => {
+  const [myStudents, setMyStudents] = useState([
+    { id: "ST6602", name: "สมหญิง มิ่งขวัญ", company: "Agoda (สำนักงานใหญ่ สุขุมวิท)", industry: "IT & Tech", docName: "รายงานความก้าวหน้าสหกิจ_รอบที่1.pdf", note: "ความก้าวหน้างาน 50% ระบบฐานข้อมูลพัฒนาได้ตามแผนงาน" },
+    { id: "ST6605", name: "เกียรติศักดิ์ อุดมสุข", company: "สถาบันวิจัยปัญญาประดิษฐ์ AI-Lab", industry: "Research & Development", docName: "เล่มรายงานฉบับสมบูรณ์_Draft1.pdf", note: "" }
+  ]);
+
+  const handleUpdateNote = (id, newText) => {
+    setMyStudents(myStudents.map(s => s.id === id ? { ...s, note: newText } : s));
+    alert("บันทึกผลการนิเทศและกรอกข้อเสนอแนะสำเร็จ");
+  };
+
+  if (activeTab === 'supervise') {
+    return (
+      <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+        <div className="mb-6">
+          <h3 className="text-[#800000] font-black flex items-center gap-2 text-lg">
+            <ClipboardCheck size={24}/> บันทึกผลตรวจการนิเทศงาน และตรวจรับเอกสารนักศึกษา
+          </h3>
+          <p className="text-xs text-gray-400 font-bold mt-1">อาจารย์สามารถดาวน์โหลดไฟล์เอกสารรายงาน ตรวจบันทึกผลคะแนนความก้าวหน้าพร้อมบันทึกคำแนะนำได้</p>
+        </div>
+
+        <div className="space-y-6">
+          {myStudents.map(student => (
+            <div key={student.id} className="p-6 bg-gray-50 rounded-3xl border border-gray-100 space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200/60 pb-4">
+                <div>
+                  <h4 className="font-black text-gray-800 text-sm md:text-base">{student.name} ({student.id})</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-1">🏢 ปฏิบัติงาน ณ: <span className="text-gray-700 font-black">{student.company}</span></p>
+                </div>
+                
+                {/* ปุ่มดาวน์โหลดไฟล์ที่นักศึกษาส่ง */}
+                <button 
+                  onClick={() => alert(`กำลังดาวน์โหลดไฟล์: ${student.docName}`)}
+                  className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 border border-blue-100 px-3 py-2 rounded-xl text-xs font-black hover:bg-blue-100 transition-colors self-start md:self-auto"
+                >
+                  <Download size={14} /> {student.docName}
+                </button>
+              </div>
+
+              {/* แบบฟอร์มบันทึกผลตรวจงาน */}
+              <div className="space-y-2">
+                <label className="text-xs font-black text-gray-500 block">ผลการตรวจประเมินนิเทศงาน และข้อเสนอแนะเพิ่มเติม</label>
+                <div className="flex gap-2">
+                  <textarea
+                    defaultValue={student.note}
+                    placeholder="กรอกข้อความแนะนำการปฏิบัติตัว เล่มรายงาน หรือผลการฝึกงานที่นี่..."
+                    id={`note-${student.id}`}
+                    className="w-full p-4 text-xs font-bold bg-white border border-gray-100 rounded-2xl outline-none focus:border-[#800000] min-h-[90px] transition-colors"
+                  />
+                  <button 
+                    onClick={() => {
+                      const text = document.getElementById(`note-${student.id}`).value;
+                      handleUpdateNote(student.id, text);
+                    }}
+                    className="bg-[#800000] hover:bg-black text-white font-black text-xs px-4 rounded-2xl shadow-sm transition-colors"
+                  >
+                    บันทึก
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTab === 'my_students') {
+    return (
+      <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+        <h3 className="text-[#800000] font-black flex items-center gap-2 text-lg mb-6">
+          <Users size={24}/> รายชื่อนักศึกษาในความดูแลรับผิดชอบ (ความปรึกษาอาจารย์นิเทศก์)
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {myStudents.map(student => (
+            <div key={student.id} className="p-5 border border-gray-100 rounded-2xl hover:bg-red-50/20 transition-all flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 text-[#800000] flex items-center justify-center font-black text-xs border border-gray-100">
+                CPE
+              </div>
+              <div className="space-y-1 flex-1">
+                <h4 className="font-black text-gray-800 text-sm">{student.name}</h4>
+                <p className="text-[11px] text-gray-400 font-bold">รหัสประจำตัว: {student.id}</p>
+                <div className="pt-2">
+                  <span className="text-[10px] font-black bg-gray-100 text-gray-600 px-2 py-1 rounded-md block md:inline-block">
+                    📍 {student.company}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+// --- 4. Main Container ---
 const MainAppContainer = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || 'student');
@@ -388,9 +567,7 @@ const MainAppContainer = () => {
         try {
           setFetchingUser(true);
           const token = localStorage.getItem('token');
-         
-          // 💡 ข้อควรระวัง: หากคุณมีปัญหา 404 หลังจากล็อกอินฝั่งอาจารย์ผ่านแล้ว 
-          // ให้เช็กพาท /student/me หรือ /staff/me ด้านล่างนี้ว่าตรงกับหลังบ้านของคุณด้วยไหมนะครับ
+          
           let fetchUrl = 'https://coop-backend-02.vercel.app/student/me';
           if (userRole === 'coordinator' || userRole === 'advisor') {
             fetchUrl = 'https://coop-backend-02.vercel.app/staff/me';
@@ -454,7 +631,7 @@ const MainAppContainer = () => {
         { id: 'overview', name: 'แผงควบคุมหลัก', icon: <BarChart3 size={20}/> },
         { id: 'company', name: 'จัดการบริษัท', icon: <Factory size={20}/> },
         { id: 'manage_requests', name: 'อนุมัติคำร้องนักศึกษา', icon: <ClipboardCheck size={20}/> },
-        { id: 'all_students', name: 'รายชื่อนักศึกษาทั้งหมด', icon: <Users size={20}/> }
+        { id: 'all_students', name: 'ข้อมูลสิทธิ์และปฏิทิน', icon: <Users size={20}/> }
       ];
     } else {
       return [
@@ -514,7 +691,7 @@ const MainAppContainer = () => {
               </button>
             )}
             <h2 className="font-black text-gray-800 uppercase tracking-wide text-sm md:text-base">
-              {activeTab === 'overview' ? 'Dashboard' : activeTab}
+              {activeTab === 'overview' ? 'Dashboard Overview' : activeTab}
             </h2>
           </div>
          
@@ -656,31 +833,150 @@ const MainAppContainer = () => {
             )}
 
             {activeTab === 'company' && <CompanyManagement />}
-            
-            {/* หน้าต่างจัดวางจำลองของฟังก์ชันผู้ประสานงานและอาจารย์นิเทศก์ */}
-            {(activeTab === 'request' || activeTab === 'manage_requests' || activeTab === 'supervise') && (
+
+            {/* หน้าสลับสำหรับฝั่ง ผู้ประสานงาน (Coordinator Views) */}
+            {userRole === 'coordinator' && (
+              <CoordinatorManagement activeTab={activeTab} />
+            )}
+
+            {/* หน้าสลับสำหรับฝั่ง อาจารย์นิเทศก์ (Advisor Views) */}
+            {userRole === 'advisor' && (
+              <AdvisorManagement activeTab={activeTab} />
+            )}
+
+            {/* Fallback View สำหรับหน้าคำร้องฝั่งนักศึกษา (Static) */}
+            {userRole === 'student' && activeTab === 'request' && (
               <div className="bg-white p-20 rounded-[40px] text-center border-2 border-dashed border-gray-100">
                 <FileSearch size={48} className="mx-auto mb-4 text-gray-300" />
-                <h3 className="font-black text-gray-800">กำลังเปิดพื้นที่ดึงข้อมูลคำร้องแบบ Dynamic ของกลุ่มบุคลากร</h3>
-                <p className="text-xs text-gray-400 font-bold mt-2">เชื่อมต่อผ่านสิทธิ์กลุ่มความปลอดภัยเพื่อความถูกต้องเรียบร้อยของเอกสารสาขาวิชา</p>
+                <h3 className="font-black text-gray-800">หน้าต่างตรวจสอบคำร้องนักศึกษา</h3>
+                <p className="text-xs text-gray-400 font-bold mt-2">คำร้องของคุณกำลังอยู่ในกระบวนการพิจารณาตรวจสอบความถูกต้องโครงสร้างขององค์กร</p>
               </div>
             )}
 
-            {(activeTab === 'all_students' || activeTab === 'my_students') && (
-              <div className="bg-white p-16 rounded-[40px] text-center border border-gray-100 shadow-sm">
-                <ShieldAlert size={48} className="mx-auto mb-4 text-[#800000]" />
-                <h3 className="font-black text-gray-800 text-base">ระบบฐานข้อมูลนักศึกษาสหกิจศึกษา</h3>
-                <p className="text-xs text-gray-400 font-bold mt-2">ข้อมูลนี้สิทธิ์เข้าถึงเฉพาะอาจารย์ประจำสาขาวิชา คอมพิวเตอร์ และ AI เท่านั้น</p>
-              </div>
-            )}
           </div>
         </section>
       </main>
-      
+     
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap');
         body { font-family: 'Sarabun', sans-serif; }
       `}} />
+    </div>
+  );
+};
+
+// --- 5. หน้า Login (ปรับพาทไปใช้ร่วมกันที่พาท /login แล้ว) ---
+const LoginPage = ({ onLogin }) => {
+  const [role, setRole] = useState('student'); // 'student' | 'coordinator' | 'advisor'
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const payload = {
+        username: String(username),
+        password: String(password)
+      };
+     
+      const endpoint = '/login'; 
+      const response = await axios.post(`${API_BASE_URL}${endpoint}`, payload);
+      
+      const token = typeof response.data === 'string' ? response.data : response.data.access_token;
+     
+      if (token) {
+        localStorage.setItem('token', token);
+        localStorage.setItem('userRole', role);
+        onLogin(role);
+      } else {
+        alert("ระบบได้รับข้อมูลสำเร็จ แต่ไม่พบสิทธิ์เข้าใช้งานในรูปแบบ Token");
+      }
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status === 404) {
+          alert(`ไม่พบหน้าปลายทาง (404 Not Found):\nพาท "${error.config.url}" ไม่มีอยู่จริงในเซิร์ฟเวอร์หลังบ้าน`);
+        } else if (error.response.status === 401 || error.response.status === 422) {
+          alert("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง หรือโครงสร้างข้อมูลไม่สมบูรณ์");
+        } else {
+          alert(`เกิดข้อผิดพลาดจากเซิร์ฟเวอร์: รหัสสถานะ ${error.response.status}`);
+        }
+      } else {
+        alert("ไม่สามารถเชื่อมต่อเครือข่ายเข้ากับเซิร์ฟเวอร์หลังบ้านได้");
+      }
+    } finally {
+      loading(false);
+      setLoading(false);
+    }
+  };
+
+  const getUsernamePlaceholder = () => {
+    if (role === 'student') return "รหัสนักศึกษา";
+    if (role === 'coordinator') return "ชื่อบัญชีอาจารย์ผู้ประสานงาน";
+    return "ชื่อบัญชีอาจารย์นิเทศก์";
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4">
+      <div className="bg-white p-8 md:p-10 rounded-[40px] shadow-2xl w-full max-w-lg border border-gray-50 text-center">
+        <div className="w-20 h-20 flex items-center justify-center mx-auto mb-4">
+          <RobotLogo className="w-18 h-18" />
+        </div>
+        <h1 className="text-xl font-black text-gray-800 uppercase mb-6 tracking-tighter">เข้าสู่ระบบระบบสหกิจศึกษา</h1>
+       
+        <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1.5 rounded-2xl mb-6">
+          <button
+            type="button"
+            onClick={() => { setRole('student'); setUsername(''); setPassword(''); }}
+            className={`py-2.5 rounded-xl font-black text-xs transition-all ${role === 'student' ? 'bg-[#800000] text-white shadow-md' : 'text-gray-500 hover:text-gray-800'}`}
+          >
+            นักศึกษา
+          </button>
+          <button
+            type="button"
+            onClick={() => { setRole('coordinator'); setUsername(''); setPassword(''); }}
+            className={`py-2.5 rounded-xl font-black text-xs transition-all ${role === 'coordinator' ? 'bg-[#800000] text-white shadow-md' : 'text-gray-500 hover:text-gray-800'}`}
+          >
+            ผู้ประสานงาน
+          </button>
+          <button
+            type="button"
+            onClick={() => { setRole('advisor'); setUsername(''); setPassword(''); }}
+            className={`py-2.5 rounded-xl font-black text-xs transition-all ${role === 'advisor' ? 'bg-[#800000] text-white shadow-md' : 'text-gray-500 hover:text-gray-800'}`}
+          >
+            อาจารย์นิเทศก์
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4 text-left">
+          <div>
+            <label className="text-xs font-black text-gray-400 block mb-1.5 pl-1">ชื่อบัญชีผู้ใช้งาน</label>
+            <input
+              type="text"
+              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold focus:border-[#800000] transition-all text-sm"
+              placeholder={getUsernamePlaceholder()}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="text-xs font-black text-gray-400 block mb-1.5 pl-1">รหัสผ่านสำหรับเข้าสู่ระบบ</label>
+            <input
+              type="password"
+              className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold focus:border-[#800000] transition-all text-sm"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" disabled={loading} className="w-full bg-[#800000] text-white py-4 mt-2 rounded-2xl font-black shadow-xl hover:bg-black transition-all text-sm tracking-wider">
+            {loading ? 'กำลังเข้าสู่ระบบ...' : `เข้าสู่ระบบในฐานะ${role === 'student' ? 'นักศึกษา' : role === 'coordinator' ? 'ผู้ประสานงาน' : 'อาจารย์นิเทศก์'}`}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
