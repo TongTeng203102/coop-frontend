@@ -1,8 +1,7 @@
-import axios from 'react-style'; // หรือใช้ import axios from 'axios'; ตามเดิมได้เลยครับ
-import axiosOriginal from 'axios';
+import axios from 'axios';
 
-const api = axiosOriginal.create({
-  // กำหนดเป็น Domain หลักเพื่อให้เรียกใช้ได้ทุก Path ของระบบ
+const api = axios.create({
+  // กำหนดเป็น Domain หลักของ Backend
   baseURL: 'https://coop-backend-02.vercel.app' 
 });
 
