@@ -1,32 +1,14 @@
+/* 1. ต้องเอา @import ขึ้นบรรทัดแรกสุดเสมอ */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+/* 2. ตามด้วยคำสั่งของ Tailwind */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    font-family: 'Sarabun', sans-serif;
-    background-color: #f8fafc;
-    color: #1e293b;
-    margin: 0;
-    padding: 0;
-  }
-}
-
-/* Custom Scrollbar สำหรับ Sidebar และ Content Zone */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(128, 0, 0, 0.2);
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(128, 0, 0, 0.5);
+/* 3. ส่วนการตั้งค่าอื่นๆ เอาไว้ล่างสุด */
+body {
+  font-family: 'Sarabun', sans-serif;
+  background-color: #f4f7f6;
+  margin: 0;
 }
